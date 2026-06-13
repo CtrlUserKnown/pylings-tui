@@ -1,0 +1,13 @@
+{
+  "": {
+    "dependencies": "/Users/christian/development/GabyLearnsPython/PylingsTUI/.build/arm64-apple-macosx/release/pylings.build/pylings.d",
+    "object": "/Users/christian/development/GabyLearnsPython/PylingsTUI/.build/arm64-apple-macosx/release/pylings.build/pylings.o",
+    "swift-dependencies": "/Users/christian/development/GabyLearnsPython/PylingsTUI/.build/arm64-apple-macosx/release/pylings.build/primary.swiftdeps"
+  },
+  "/Users/christian/development/GabyLearnsPython/PylingsTUI/Sources/pylings/main.swift": {
+    "object": "/Users/christian/development/GabyLearnsPython/PylingsTUI/.build/arm64-apple-macosx/release/pylings.build/main.swift.o",
+    "swiftmodule": "/Users/christian/development/GabyLearnsPython/PylingsTUI/.build/arm64-apple-macosx/release/pylings.build/main~partial.swiftmodule",
+    "swift-dependencies": "/Users/christian/development/GabyLearnsPython/PylingsTUI/.build/arm64-apple-macosx/release/pylings.build/main.swiftdeps",
+    "diagnostics": "/Users/christian/development/GabyLearnsPython/PylingsTUI/.build/arm64-apple-macosx/release/pylings.build/main.dia"
+  }
+}

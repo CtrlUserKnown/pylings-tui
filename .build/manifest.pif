@@ -1,0 +1,466 @@
+[
+  {
+    "contents" : {
+      "guid" : "Workspace:/Users/christian/development/GabyLearnsPython/PylingsTUI@11",
+      "name" : "pylings",
+      "path" : "/Users/christian/development/GabyLearnsPython/PylingsTUI",
+      "projects" : [
+        "140c094917819a8c7c4657eebe6643eb9a9f960b37dead23ec6eaea1b37fea69",
+        "f3ec1cff72be116388bedca109b8dec624da0ba75c6be68298c64ce31402d1a4"
+      ]
+    },
+    "signature" : "612217af205c2010fda802c9bd7a8a9757d01c87e160b6902df3c54593c955ca",
+    "type" : "workspace"
+  },
+  {
+    "contents" : {
+      "buildConfigurations" : [
+        {
+          "buildSettings" : {
+            "CLANG_ENABLE_OBJC_ARC" : "YES",
+            "CODE_SIGNING_REQUIRED" : "NO",
+            "CODE_SIGN_IDENTITY" : "",
+            "COPY_PHASE_STRIP" : "NO",
+            "DEBUG_INFORMATION_FORMAT" : "dwarf",
+            "DRIVERKIT_DEPLOYMENT_TARGET" : "19.0",
+            "DYLIB_INSTALL_NAME_BASE" : "@rpath",
+            "ENABLE_NS_ASSERTIONS" : "YES",
+            "ENABLE_TESTABILITY" : "YES",
+            "ENABLE_TESTING_SEARCH_PATHS" : "YES",
+            "ENTITLEMENTS_REQUIRED" : "NO",
+            "FRAMEWORK_SEARCH_PATHS[__platform_filter=ios;ios-simulator]" : [
+              "$(inherited)",
+              "$(PLATFORM_DIR)/Developer/Library/Frameworks"
+            ],
+            "FRAMEWORK_SEARCH_PATHS[__platform_filter=macos]" : [
+              "$(inherited)",
+              "$(PLATFORM_DIR)/Developer/Library/Frameworks"
+            ],
+            "FRAMEWORK_SEARCH_PATHS[__platform_filter=tvos;tvos-simulator]" : [
+              "$(inherited)",
+              "$(PLATFORM_DIR)/Developer/Library/Frameworks"
+            ],
+            "GCC_OPTIMIZATION_LEVEL" : "0",
+            "GCC_PREPROCESSOR_DEFINITIONS" : [
+              "$(inherited)",
+              "SWIFT_PACKAGE",
+              "DEBUG=1"
+            ],
+            "IPHONEOS_DEPLOYMENT_TARGET" : "12.0",
+            "IPHONEOS_DEPLOYMENT_TARGET[__platform_filter=ios-maccatalyst]" : "13.0",
+            "KEEP_PRIVATE_EXTERNS" : "NO",
+            "MACOSX_DEPLOYMENT_TARGET" : "13.0",
+            "ONLY_ACTIVE_ARCH" : "YES",
+            "OTHER_LDRFLAGS" : [
+
+            ],
+            "PRODUCT_NAME" : "$(TARGET_NAME)",
+            "SDKROOT" : "auto",
+            "SDK_VARIANT" : "auto",
+            "SKIP_INSTALL" : "YES",
+            "SUPPORTED_PLATFORMS" : [
+              "$(AVAILABLE_PLATFORMS)"
+            ],
+            "SWIFT_ACTIVE_COMPILATION_CONDITIONS" : [
+              "$(inherited)",
+              "SWIFT_PACKAGE",
+              "DEBUG"
+            ],
+            "SWIFT_INSTALL_OBJC_HEADER" : "NO",
+            "SWIFT_OBJC_INTERFACE_HEADER_NAME" : "",
+            "SWIFT_OPTIMIZATION_LEVEL" : "-Onone",
+            "TVOS_DEPLOYMENT_TARGET" : "12.0",
+            "USE_HEADERMAP" : "NO",
+            "WATCHOS_DEPLOYMENT_TARGET" : "4.0",
+            "XROS_DEPLOYMENT_TARGET" : "1.0"
+          },
+          "guid" : "PACKAGE:/Users/christian/development/GabyLearnsPython/PylingsTUI::BUILDCONFIG_Debug",
+          "impartedBuildProperties" : {
+            "buildSettings" : {
+
+            }
+          },
+          "name" : "Debug"
+        },
+        {
+          "buildSettings" : {
+            "CLANG_ENABLE_OBJC_ARC" : "YES",
+            "CODE_SIGNING_REQUIRED" : "NO",
+            "CODE_SIGN_IDENTITY" : "",
+            "COPY_PHASE_STRIP" : "YES",
+            "DEBUG_INFORMATION_FORMAT" : "dwarf-with-dsym",
+            "DRIVERKIT_DEPLOYMENT_TARGET" : "19.0",
+            "DYLIB_INSTALL_NAME_BASE" : "@rpath",
+            "ENABLE_TESTING_SEARCH_PATHS" : "YES",
+            "ENTITLEMENTS_REQUIRED" : "NO",
+            "FRAMEWORK_SEARCH_PATHS[__platform_filter=ios;ios-simulator]" : [
+              "$(inherited)",
+              "$(PLATFORM_DIR)/Developer/Library/Frameworks"
+            ],
+            "FRAMEWORK_SEARCH_PATHS[__platform_filter=macos]" : [
+              "$(inherited)",
+              "$(PLATFORM_DIR)/Developer/Library/Frameworks"
+            ],
+            "FRAMEWORK_SEARCH_PATHS[__platform_filter=tvos;tvos-simulator]" : [
+              "$(inherited)",
+              "$(PLATFORM_DIR)/Developer/Library/Frameworks"
+            ],
+            "GCC_OPTIMIZATION_LEVEL" : "s",
+            "GCC_PREPROCESSOR_DEFINITIONS" : [
+              "$(inherited)",
+              "SWIFT_PACKAGE"
+            ],
+            "IPHONEOS_DEPLOYMENT_TARGET" : "12.0",
+            "IPHONEOS_DEPLOYMENT_TARGET[__platform_filter=ios-maccatalyst]" : "13.0",
+            "KEEP_PRIVATE_EXTERNS" : "NO",
+            "MACOSX_DEPLOYMENT_TARGET" : "13.0",
+            "OTHER_LDRFLAGS" : [
+
+            ],
+            "PRODUCT_NAME" : "$(TARGET_NAME)",
+            "SDKROOT" : "auto",
+            "SDK_VARIANT" : "auto",
+            "SKIP_INSTALL" : "YES",
+            "SUPPORTED_PLATFORMS" : [
+              "$(AVAILABLE_PLATFORMS)"
+            ],
+            "SWIFT_ACTIVE_COMPILATION_CONDITIONS" : [
+              "$(inherited)",
+              "SWIFT_PACKAGE"
+            ],
+            "SWIFT_INSTALL_OBJC_HEADER" : "NO",
+            "SWIFT_OBJC_INTERFACE_HEADER_NAME" : "",
+            "SWIFT_OPTIMIZATION_LEVEL" : "-Owholemodule",
+            "TVOS_DEPLOYMENT_TARGET" : "12.0",
+            "USE_HEADERMAP" : "NO",
+            "WATCHOS_DEPLOYMENT_TARGET" : "4.0",
+            "XROS_DEPLOYMENT_TARGET" : "1.0"
+          },
+          "guid" : "PACKAGE:/Users/christian/development/GabyLearnsPython/PylingsTUI::BUILDCONFIG_Release",
+          "impartedBuildProperties" : {
+            "buildSettings" : {
+
+            }
+          },
+          "name" : "Release"
+        }
+      ],
+      "defaultConfigurationName" : "Release",
+      "developmentRegion" : "en",
+      "groupTree" : {
+        "children" : [
+          {
+            "children" : [
+              {
+                "fileType" : "sourcecode.swift",
+                "guid" : "PACKAGE:/Users/christian/development/GabyLearnsPython/PylingsTUI::MAINGROUP::REF_0::REF_0",
+                "name" : "main.swift",
+                "path" : "main.swift",
+                "sourceTree" : "<group>",
+                "type" : "file"
+              }
+            ],
+            "guid" : "PACKAGE:/Users/christian/development/GabyLearnsPython/PylingsTUI::MAINGROUP::REF_0",
+            "name" : "Sources/pylings",
+            "path" : "Sources/pylings",
+            "sourceTree" : "<group>",
+            "type" : "group"
+          }
+        ],
+        "guid" : "PACKAGE:/Users/christian/development/GabyLearnsPython/PylingsTUI::MAINGROUP",
+        "name" : "",
+        "path" : "",
+        "sourceTree" : "<group>",
+        "type" : "group"
+      },
+      "guid" : "PACKAGE:/Users/christian/development/GabyLearnsPython/PylingsTUI@11",
+      "path" : "/Users/christian/development/GabyLearnsPython/PylingsTUI",
+      "projectDirectory" : "/Users/christian/development/GabyLearnsPython/PylingsTUI",
+      "projectIsPackage" : "true",
+      "projectName" : "pylings",
+      "targets" : [
+        "a935a0049be66c314d6cac631066940afe36109cd7f287faaac61238ad2f52d8"
+      ]
+    },
+    "signature" : "140c094917819a8c7c4657eebe6643eb9a9f960b37dead23ec6eaea1b37fea69",
+    "type" : "project"
+  },
+  {
+    "contents" : {
+      "buildConfigurations" : [
+        {
+          "buildSettings" : {
+            "CLANG_ENABLE_MODULES" : "YES",
+            "DEFINES_MODULE" : "YES",
+            "INSTALL_PATH" : "/usr/local/bin",
+            "LD_RUNPATH_SEARCH_PATHS" : [
+              "$(inherited)",
+              "@executable_path/../lib"
+            ],
+            "LIBRARY_SEARCH_PATHS" : [
+              "$(inherited)",
+              "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx"
+            ],
+            "OTHER_SWIFT_FLAGS" : [
+              "-package-name",
+              "pylingstui"
+            ],
+            "PACKAGE_RESOURCE_TARGET_KIND" : "regular",
+            "PRODUCT_BUNDLE_IDENTIFIER" : "pylings",
+            "PRODUCT_MODULE_NAME" : "pylings",
+            "PRODUCT_NAME" : "$(TARGET_NAME)",
+            "SKIP_INSTALL" : "NO",
+            "SWIFT_ACTIVE_COMPILATION_CONDITIONS" : [
+              "$(inherited)",
+              "SWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE"
+            ],
+            "SWIFT_VERSION" : "5",
+            "TARGET_NAME" : "pylings"
+          },
+          "guid" : "PACKAGE-PRODUCT:pylings::BUILDCONFIG_Debug",
+          "impartedBuildProperties" : {
+            "buildSettings" : {
+
+            }
+          },
+          "name" : "Debug"
+        },
+        {
+          "buildSettings" : {
+            "CLANG_ENABLE_MODULES" : "YES",
+            "DEFINES_MODULE" : "YES",
+            "INSTALL_PATH" : "/usr/local/bin",
+            "LD_RUNPATH_SEARCH_PATHS" : [
+              "$(inherited)",
+              "@executable_path/../lib"
+            ],
+            "LIBRARY_SEARCH_PATHS" : [
+              "$(inherited)",
+              "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx"
+            ],
+            "OTHER_SWIFT_FLAGS" : [
+              "-package-name",
+              "pylingstui"
+            ],
+            "PACKAGE_RESOURCE_TARGET_KIND" : "regular",
+            "PRODUCT_BUNDLE_IDENTIFIER" : "pylings",
+            "PRODUCT_MODULE_NAME" : "pylings",
+            "PRODUCT_NAME" : "$(TARGET_NAME)",
+            "SKIP_INSTALL" : "NO",
+            "SWIFT_ACTIVE_COMPILATION_CONDITIONS" : [
+              "$(inherited)",
+              "SWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE"
+            ],
+            "SWIFT_VERSION" : "5",
+            "TARGET_NAME" : "pylings"
+          },
+          "guid" : "PACKAGE-PRODUCT:pylings::BUILDCONFIG_Release",
+          "impartedBuildProperties" : {
+            "buildSettings" : {
+
+            }
+          },
+          "name" : "Release"
+        }
+      ],
+      "buildPhases" : [
+        {
+          "buildFiles" : [
+            {
+              "fileReference" : "PACKAGE:/Users/christian/development/GabyLearnsPython/PylingsTUI::MAINGROUP::REF_0::REF_0",
+              "guid" : "PACKAGE-PRODUCT:pylings::BUILDPHASE_0::0",
+              "platformFilters" : [
+
+              ]
+            }
+          ],
+          "guid" : "PACKAGE-PRODUCT:pylings::BUILDPHASE_0",
+          "type" : "com.apple.buildphase.sources"
+        }
+      ],
+      "buildRules" : [
+
+      ],
+      "dependencies" : [
+
+      ],
+      "guid" : "PACKAGE-PRODUCT:pylings@11",
+      "impartedBuildProperties" : {
+        "buildSettings" : {
+
+        }
+      },
+      "name" : "pylings_48604D23A3C6E58D_PackageProduct",
+      "productReference" : {
+        "guid" : "PRODUCTREF-PACKAGE-PRODUCT:pylings",
+        "name" : "pylings",
+        "type" : "file"
+      },
+      "productTypeIdentifier" : "com.apple.product-type.tool",
+      "type" : "standard"
+    },
+    "signature" : "a935a0049be66c314d6cac631066940afe36109cd7f287faaac61238ad2f52d8",
+    "type" : "target"
+  },
+  {
+    "contents" : {
+      "buildConfigurations" : [
+        {
+          "buildSettings" : {
+            "PRODUCT_NAME" : "$(TARGET_NAME)",
+            "SDKROOT" : "auto",
+            "SDK_VARIANT" : "auto",
+            "SKIP_INSTALL" : "YES",
+            "SUPPORTED_PLATFORMS" : [
+              "$(AVAILABLE_PLATFORMS)"
+            ]
+          },
+          "guid" : "AGGREGATE::BUILDCONFIG_Debug",
+          "impartedBuildProperties" : {
+            "buildSettings" : {
+
+            }
+          },
+          "name" : "Debug"
+        },
+        {
+          "buildSettings" : {
+            "PRODUCT_NAME" : "$(TARGET_NAME)",
+            "SDKROOT" : "auto",
+            "SDK_VARIANT" : "auto",
+            "SKIP_INSTALL" : "YES",
+            "SUPPORTED_PLATFORMS" : [
+              "$(AVAILABLE_PLATFORMS)"
+            ]
+          },
+          "guid" : "AGGREGATE::BUILDCONFIG_Release",
+          "impartedBuildProperties" : {
+            "buildSettings" : {
+
+            }
+          },
+          "name" : "Release"
+        }
+      ],
+      "defaultConfigurationName" : "Release",
+      "developmentRegion" : "en",
+      "groupTree" : {
+        "children" : [
+
+        ],
+        "guid" : "AGGREGATE::MAINGROUP",
+        "name" : "",
+        "path" : "",
+        "sourceTree" : "<group>",
+        "type" : "group"
+      },
+      "guid" : "AGGREGATE@11",
+      "path" : "/Users/christian/development/GabyLearnsPython/PylingsTUI",
+      "projectDirectory" : "/Users/christian/development/GabyLearnsPython/PylingsTUI",
+      "projectIsPackage" : "true",
+      "projectName" : "Aggregate",
+      "targets" : [
+        "f33d154529be5669e8d103ee075784c331d3a096a02d7355b4e17a335e0acc50",
+        "e3eaf0c6c73fe360af8942006b77afc818f5c9282f3ea3a639280ff90f4a2cbb"
+      ]
+    },
+    "signature" : "f3ec1cff72be116388bedca109b8dec624da0ba75c6be68298c64ce31402d1a4",
+    "type" : "project"
+  },
+  {
+    "contents" : {
+      "buildConfigurations" : [
+        {
+          "buildSettings" : {
+
+          },
+          "guid" : "ALL-EXCLUDING-TESTS::BUILDCONFIG_Debug",
+          "impartedBuildProperties" : {
+            "buildSettings" : {
+
+            }
+          },
+          "name" : "Debug"
+        },
+        {
+          "buildSettings" : {
+
+          },
+          "guid" : "ALL-EXCLUDING-TESTS::BUILDCONFIG_Release",
+          "impartedBuildProperties" : {
+            "buildSettings" : {
+
+            }
+          },
+          "name" : "Release"
+        }
+      ],
+      "buildPhases" : [
+
+      ],
+      "dependencies" : [
+        {
+          "guid" : "PACKAGE-PRODUCT:pylings@11"
+        }
+      ],
+      "guid" : "ALL-EXCLUDING-TESTS@11",
+      "impartedBuildProperties" : {
+        "buildSettings" : {
+
+        }
+      },
+      "name" : "AllExcludingTests",
+      "type" : "aggregate"
+    },
+    "signature" : "f33d154529be5669e8d103ee075784c331d3a096a02d7355b4e17a335e0acc50",
+    "type" : "target"
+  },
+  {
+    "contents" : {
+      "buildConfigurations" : [
+        {
+          "buildSettings" : {
+
+          },
+          "guid" : "ALL-INCLUDING-TESTS::BUILDCONFIG_Debug",
+          "impartedBuildProperties" : {
+            "buildSettings" : {
+
+            }
+          },
+          "name" : "Debug"
+        },
+        {
+          "buildSettings" : {
+
+          },
+          "guid" : "ALL-INCLUDING-TESTS::BUILDCONFIG_Release",
+          "impartedBuildProperties" : {
+            "buildSettings" : {
+
+            }
+          },
+          "name" : "Release"
+        }
+      ],
+      "buildPhases" : [
+
+      ],
+      "dependencies" : [
+        {
+          "guid" : "PACKAGE-PRODUCT:pylings@11"
+        }
+      ],
+      "guid" : "ALL-INCLUDING-TESTS@11",
+      "impartedBuildProperties" : {
+        "buildSettings" : {
+
+        }
+      },
+      "name" : "AllIncludingTests",
+      "type" : "aggregate"
+    },
+    "signature" : "e3eaf0c6c73fe360af8942006b77afc818f5c9282f3ea3a639280ff90f4a2cbb",
+    "type" : "target"
+  }
+]

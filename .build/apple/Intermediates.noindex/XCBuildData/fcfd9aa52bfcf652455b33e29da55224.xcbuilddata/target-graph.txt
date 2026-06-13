@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'AllExcludingTests' in project 'Aggregate'
+➜ Explicit dependency on target 'pylings_48604D23A3C6E58D_PackageProduct' in project 'pylings'
+Target 'pylings_48604D23A3C6E58D_PackageProduct' in project 'pylings' (no dependencies)
