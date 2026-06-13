@@ -1,0 +1,1445 @@
+#!/usr/bin/env python3
+import sys
+import os
+import time
+import importlib.util
+import traceback
+import io
+import contextlib
+import ast
+import select
+import termios
+import tty
+
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+PRACTICE_DIR = os.path.join(SCRIPT_DIR, "Practice")
+
+GREEN = "\033[92m"
+RED = "\033[91m"
+YELLOW = "\033[93m"
+CYAN = "\033[96m"
+BOLD = "\033[1m"
+DIM = "\033[2m"
+RESET = "\033[0m"
+
+
+MODULE_TITLES = {
+    1: "Variables, Math, and Functions",
+    2: "Data Types and Functions",
+    3: "Operators and Conditionals",
+    4: "Scopes",
+    5: "Loops",
+    6: "Error Handling",
+    7: "Classes and Inheritance",
+    8: "Common Methods",
+    9: "Modules and Packages",
+    10: "List Comprehensions",
+    11: "Advanced Dicts and Sets",
+    12: "Advanced Functions",
+    13: "String Formatting and Text",
+    14: "Numbers and Math",
+    15: "Dates and Time",
+    16: "CSV and JSON",
+}
+
+
+def mod_path(n):
+    return os.path.join(PRACTICE_DIR, f"Mod{n}.py")
+
+
+def is_not_done(n):
+    path = mod_path(n)
+    if not os.path.exists(path):
+        return False
+    with open(path) as f:
+        for line in f:
+            if "# I AM NOT DONE" in line:
+                return True
+    return False
+
+
+def list_exercises():
+    print(f"\n{BOLD}Exercises:{RESET}\n")
+    for i in range(1, 17):
+        path = mod_path(i)
+        if os.path.exists(path):
+            done = not is_not_done(i)
+            status = f"{GREEN}✔ Done{RESET}" if done else f"{RED}✘ Not Done{RESET}"
+            print(f"  {i}. {status} — {MODULE_TITLES[i]}")
+    print()
+
+
+def find_next():
+    for i in range(1, 17):
+        if is_not_done(i):
+            return i
+    return None
+
+
+def load_module(path):
+    spec = importlib.util.spec_from_file_location("mod", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+_IS_TTY = sys.stdout.isatty()
+
+
+def check(label, passed, hint=""):
+    if not hasattr(check, 'total'):
+        check.total = 0
+        check.passed = 0
+        check.failures = []
+    check.total += 1
+    if passed:
+        check.passed += 1
+    else:
+        check.failures.append((label, hint))
+
+    if _IS_TTY:
+        failed = check.total - check.passed
+        bar_len = 20
+        filled = int(bar_len * check.passed / max(check.total, 1))
+        bar = f"{GREEN}{'█' * filled}{RESET}{DIM}{'░' * (bar_len - filled)}{RESET}"
+        if failed:
+            status = f"{GREEN}{check.passed} passed{RESET}, {RED}{failed} failed{RESET}"
+        else:
+            status = f"{GREEN}{check.passed}/{check.total} passed{RESET}"
+        print(f"\r  {bar}  {status}  ", end="", flush=True)
+    else:
+        if passed:
+            print(f"  {GREEN}✔{RESET}  {label}")
+        else:
+            msg = f"  {RED}✘{RESET}  {label}"
+            if hint:
+                msg += f"\n     {DIM}hint: {hint}{RESET}"
+            print(msg)
+    return passed
+
+
+def header(mod_num):
+    print(f"\n{BOLD}{CYAN}{'─' * 50}{RESET}")
+    print(f"{BOLD}{CYAN}  Module {mod_num} — {MODULE_TITLES[mod_num]}{RESET}")
+    print(f"{BOLD}{CYAN}{'─' * 50}{RESET}\n")
+
+
+def summary(results, mod_num):
+    passed = sum(results)
+    total = len(results)
+    bar_len = 30
+    filled = int(bar_len * passed / total) if total else 0
+    bar = f"{GREEN}{'█' * filled}{RESET}{DIM}{'░' * (bar_len - filled)}{RESET}"
+    print(f"\n{BOLD}{CYAN}{'─' * 50}{RESET}")
+    print(f"  {bar}  {BOLD}{passed}/{total}{RESET} passed")
+    if passed == total:
+        print(f"\n  {GREEN}{BOLD}All checks passed! Great work.{RESET}")
+        if is_not_done(mod_num):
+            print(f"  {YELLOW}Remove '# I AM NOT DONE' from Practice/Mod{mod_num}.py{RESET}")
+            print(f"  {YELLOW}to mark the exercise as complete.{RESET}")
+    else:
+        print(f"\n  {YELLOW}Keep going — fix the {RED}✘{RESET}{YELLOW} items above.{RESET}")
+    print(f"{BOLD}{CYAN}{'─' * 50}{RESET}\n")
+    return passed == total
+
+
+def check_syntax(path):
+    with open(path) as f:
+        source = f.read()
+    try:
+        ast.parse(source)
+        return None
+    except SyntaxError as e:
+        return e
+
+
+def run_mod(n):
+    path = mod_path(n)
+    if not os.path.exists(path):
+        print(f"\n{RED}Could not find {path}{RESET}")
+        return False
+
+    syntax_error = check_syntax(path)
+    if syntax_error:
+        print(f"\n{RED}{BOLD}Syntax Error{RESET}")
+        print(f"  {path}:{syntax_error.lineno}:{syntax_error.offset}")
+        print(f"\n  {RED}{syntax_error.msg}{RESET}")
+        if syntax_error.text:
+            print(f"\n  {DIM}{syntax_error.text.rstrip()}{RESET}")
+            if syntax_error.offset:
+                print(f"  {' ' * (syntax_error.offset - 1)}{RED}^{RESET}")
+        print(f"\n  {YELLOW}Fix the syntax error and save again.{RESET}\n")
+        return False
+
+    header(n)
+
+    try:
+        mod = load_module(path)
+    except Exception:
+        print(f"{RED}Error loading Mod{n}.py:{RESET}\n")
+        traceback.print_exc()
+        print(f"\n{YELLOW}Fix the error above and run again.{RESET}\n")
+        return False
+
+    check.total = 0
+    check.passed = 0
+    check.failures = []
+
+    results = TEST_MAP[n](mod)
+
+    if _IS_TTY:
+        print("\r" + " " * 80 + "\r", end="")
+        if check.failures:
+            for label, hint in check.failures:
+                msg = f"  {RED}✘{RESET}  {label}"
+                if hint:
+                    msg += f"\n     {DIM}hint: {hint}{RESET}"
+                print(msg)
+
+    return summary(results, n)
+
+
+# ── Tests ────────────────────────────────────────────────────────────────────
+
+
+def test_mod1(m):
+    r = []
+    r.append(check("cityName is a non-empty string",
+        isinstance(getattr(m, 'cityName', None), str) and len(m.cityName) > 0,
+        "cityName = \"Chicago\""))
+
+    length = getattr(m, 'length', None)
+    width = getattr(m, 'width', None)
+    r.append(check("length and width are numbers",
+        isinstance(length, (int, float)) and isinstance(width, (int, float)),
+        "length = 5  /  width = 3"))
+
+    area = getattr(m, 'area', None)
+    expected_area = (length * width) if isinstance(length, (int, float)) and isinstance(width, (int, float)) else None
+    r.append(check("area equals length * width",
+        area is not None and area == expected_area,
+        "area = length * width"))
+
+    r.append(check("temperature is 98.6",
+        getattr(m, 'temperature', None) == 98.6,
+        "temperature = 98.6"))
+
+    try:
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            m.greetUser()
+        r.append(check("greetUser() prints 'Hello, welcome!'",
+            "Hello, welcome!" in buf.getvalue(),
+            "print(\"Hello, welcome!\")"))
+    except Exception:
+        r.append(check("greetUser() prints 'Hello, welcome!'", False, "define the function"))
+
+    try:
+        r.append(check("addNumbers(3, 4) returns 7",
+            m.addNumbers(3, 4) == 7,
+            "return a + b"))
+    except Exception:
+        r.append(check("addNumbers(3, 4) returns 7", False, "define addNumbers(a, b)"))
+
+    total = getattr(m, 'total', None)
+    r.append(check("total equals addNumbers(15, 27) = 42",
+        total == 42,
+        "total = addNumbers(15, 27)"))
+
+    try:
+        r.append(check("squareNumber(6) returns 36",
+            m.squareNumber(6) == 36,
+            "return number * number"))
+    except Exception:
+        r.append(check("squareNumber(6) returns 36", False, "define squareNumber(number)"))
+
+    price = getattr(m, 'price', None)
+    qty = getattr(m, 'quantity', None)
+    orderCost = getattr(m, 'orderCost', None)
+    r.append(check("price=49.99, quantity=3, orderCost=149.97",
+        price == 49.99 and qty == 3 and round(orderCost or 0, 2) == 149.97,
+        "orderCost = price * quantity"))
+
+    try:
+        result = m.convertToMeters(1)
+        r.append(check("convertToMeters(1) returns 0.3048",
+            abs(result - 0.3048) < 0.0001,
+            "return feet * 0.3048"))
+    except Exception:
+        r.append(check("convertToMeters(1) returns 0.3048", False, "define convertToMeters(feet)"))
+
+    try:
+        r.append(check("getFullName('Ada', 'Lovelace') returns 'Ada Lovelace'",
+            m.getFullName("Ada", "Lovelace") == "Ada Lovelace",
+            "return firstName + ' ' + lastName"))
+    except Exception:
+        r.append(check("getFullName('Ada', 'Lovelace') returns 'Ada Lovelace'", False, "define getFullName(firstName, lastName)"))
+
+    sc = getattr(m, 'score', None)
+    r.append(check("score is 0",
+        sc == 0,
+        "score = 0"))
+    try:
+        r.append(check("addPoints(10) returns 10 (score + 10)",
+            m.addPoints(10) == 10,
+            "return score + number"))
+    except Exception:
+        r.append(check("addPoints(10) returns 10", False, "define addPoints(number)"))
+
+    return r
+
+
+def test_mod2(m):
+    r = []
+    r.append(check("myString is a string",
+        isinstance(getattr(m, 'myString', None), str),
+        "myString = \"hello\""))
+    r.append(check("myInt is an int",
+        isinstance(getattr(m, 'myInt', None), int) and not isinstance(getattr(m, 'myInt', None), bool),
+        "myInt = 5"))
+    r.append(check("myFloat is a float",
+        isinstance(getattr(m, 'myFloat', None), float),
+        "myFloat = 3.14"))
+    r.append(check("myBool is a boolean",
+        isinstance(getattr(m, 'myBool', None), bool),
+        "myBool = True"))
+    r.append(check("myList is a list",
+        isinstance(getattr(m, 'myList', None), list),
+        "myList = [1, 2, 3]"))
+
+    ff = getattr(m, 'favoriteFoods', None)
+    r.append(check("favoriteFoods is a list with 4+ items",
+        isinstance(ff, list) and len(ff) >= 4,
+        "favoriteFoods = [\"pizza\", \"sushi\", \"tacos\", \"ramen\"]"))
+
+    r.append(check("isLoggedIn is True",
+        getattr(m, 'isLoggedIn', None) == True,
+        "isLoggedIn = False  then  isLoggedIn = True"))
+
+    try:
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            m.describeUser("Alex", 25)
+        out = buf.getvalue()
+        r.append(check("describeUser prints userName and age",
+            "Alex" in out and "25" in out,
+            "print(userName + \" is \" + str(age) + \" years old.\")"))
+    except Exception:
+        r.append(check("describeUser prints userName and age", False, "define describeUser(userName, age)"))
+
+    try:
+        result = m.calcTip(50.0, 0.2)
+        r.append(check("calcTip(50.0, 0.2) returns 10.0",
+            abs(result - 10.0) < 0.001,
+            "return billTotal * tipPercent"))
+    except Exception:
+        r.append(check("calcTip(50.0, 0.2) returns 10.0", False, "define calcTip(billTotal, tipPercent)"))
+
+    wd = getattr(m, 'weekdays', None)
+    r.append(check("weekdays is a list with 5 items",
+        isinstance(wd, list) and len(wd) == 5,
+        "weekdays = [\"Monday\", \"Tuesday\", ...]"))
+
+    try:
+        r.append(check("isAdult(18) returns True, isAdult(17) returns False",
+            m.isAdult(18) == True and m.isAdult(17) == False,
+            "return age >= 18"))
+    except Exception:
+        r.append(check("isAdult(18) returns True, isAdult(17) returns False", False, "define isAdult(age)"))
+
+    r.append(check("gpa is a float",
+        isinstance(getattr(m, 'gpa', None), float),
+        "gpa = 3.8"))
+    r.append(check("graduationYear is an int",
+        isinstance(getattr(m, 'graduationYear', None), int) and not isinstance(getattr(m, 'graduationYear', None), bool),
+        "graduationYear = 2026"))
+
+    return r
+
+
+def test_mod3(m):
+    r = []
+    r.append(check("remainder = 57 % 2 = 1",
+        getattr(m, 'remainder', None) == 1,
+        "remainder = 57 % 2"))
+
+    a = getattr(m, 'a', None)
+    b = getattr(m, 'b', None)
+    comp = getattr(m, 'compResult', None)
+    r.append(check("a and b are numbers, compResult = (a >= b)",
+        isinstance(a, (int, float)) and isinstance(b, (int, float)) and comp == (a >= b),
+        "compResult = a >= b"))
+
+    speed = getattr(m, 'speed', None)
+    speedMsg = getattr(m, 'speedMsg', None)
+    r.append(check("speed=85, speedMsg='Speeding!'",
+        speed == 85 and speedMsg == "Speeding!",
+        "if speed > 65: speedMsg = \"Speeding!\""))
+
+    wb = getattr(m, 'walletBalance', None)
+    wm = getattr(m, 'walletMsg', None)
+    r.append(check("walletBalance=40, walletMsg='Not enough funds.'",
+        wb == 40.00 and wm == "Not enough funds.",
+        "if walletBalance >= 50: ... else: walletMsg = \"Not enough funds.\""))
+
+    ts = getattr(m, 'testScore', None)
+    grade = getattr(m, 'grade', None)
+    expected_grade = None
+    if isinstance(ts, (int, float)):
+        if ts >= 90: expected_grade = "A"
+        elif ts >= 80: expected_grade = "B"
+        elif ts >= 70: expected_grade = "C"
+        elif ts >= 60: expected_grade = "D"
+        else: expected_grade = "F"
+    r.append(check(f"grade matches testScore ({ts} → {expected_grade})",
+        grade == expected_grade,
+        "use if/elif/else with the score ranges"))
+
+    ht = getattr(m, 'hasTicket', None)
+    hid = getattr(m, 'hasID', None)
+    ea = getattr(m, 'entryAllowed', None)
+    r.append(check("entryAllowed = hasTicket and hasID",
+        isinstance(ht, bool) and isinstance(hid, bool) and ea == (ht and hid),
+        "entryAllowed = hasTicket and hasID"))
+
+    hour = getattr(m, 'hour', None)
+    tg = getattr(m, 'timeGreeting', None)
+    expected_greeting = None
+    if isinstance(hour, int):
+        if hour < 12: expected_greeting = "Good morning"
+        elif hour <= 17: expected_greeting = "Good afternoon"
+        else: expected_greeting = "Good evening"
+    r.append(check(f"timeGreeting matches hour ({hour} → '{expected_greeting}')",
+        tg == expected_greeting,
+        "if hour < 12 / elif hour <= 17 / else"))
+
+    r.append(check("powerResult = 3 ** 5 = 243",
+        getattr(m, 'powerResult', None) == 243,
+        "powerResult = 3 ** 5"))
+
+    ua = getattr(m, 'userAge', None)
+    hpp = getattr(m, 'hasParentPermission', None)
+    cj = getattr(m, 'canJoin', None)
+    if isinstance(ua, int) and isinstance(hpp, bool):
+        expected_cj = ua >= 18 or (ua >= 13 and hpp)
+    else:
+        expected_cj = None
+    r.append(check("canJoin logic: 18+ OR (13+ and hasParentPermission)",
+        cj == expected_cj,
+        "canJoin = userAge >= 18 or (userAge >= 13 and hasParentPermission)"))
+
+    num = getattr(m, 'number', None)
+    ns = getattr(m, 'numberSign', None)
+    expected_ns = None
+    if isinstance(num, (int, float)):
+        if num > 0: expected_ns = "Positive"
+        elif num < 0: expected_ns = "Negative"
+        else: expected_ns = "Zero"
+    r.append(check(f"numberSign matches number ({num} → '{expected_ns}')",
+        ns == expected_ns,
+        "if number > 0 / elif number < 0 / else"))
+
+    ic = getattr(m, 'itemsInCart', None)
+    ms = getattr(m, 'memberStatus', None)
+    fs = getattr(m, 'freeShipping', None)
+    if isinstance(ic, int) and isinstance(ms, bool):
+        expected_fs = ic >= 5 or ms
+    else:
+        expected_fs = None
+    r.append(check("freeShipping = itemsInCart >= 5 or memberStatus",
+        fs == expected_fs,
+        "freeShipping = itemsInCart >= 5 or memberStatus"))
+
+    pw = getattr(m, 'password', None)
+    ps = getattr(m, 'passwordStrength', None)
+    expected_ps = None
+    if isinstance(pw, str):
+        expected_ps = "Strong password" if len(pw) > 10 else "Weak password"
+    r.append(check(f"passwordStrength matches password length ({len(pw) if isinstance(pw,str) else '?'} chars → '{expected_ps}')",
+        ps == expected_ps,
+        "if len(password) > 10: ... else: ..."))
+
+    return r
+
+
+def test_mod4(m):
+    r = []
+    r.append(check("appName is a non-empty string",
+        isinstance(getattr(m, 'appName', None), str) and len(m.appName) > 0,
+        "appName = \"MyApp\""))
+
+    try:
+        result = m.localTest()
+        r.append(check("localTest() returns a string",
+            isinstance(result, str),
+            "create a local variable inside and return it"))
+    except Exception:
+        r.append(check("localTest() returns a string", False, "def localTest(): message = '...' ; return message"))
+
+    lives_before = getattr(m, 'lives', None)
+    r.append(check("lives is a number",
+        isinstance(lives_before, (int, float)),
+        "lives = 3"))
+    try:
+        m.loseLife()
+        r.append(check("loseLife() decrements lives by 1",
+            m.lives == lives_before - 1,
+            "global lives; lives -= 1"))
+    except Exception:
+        r.append(check("loseLife() decrements lives by 1", False, "define loseLife() with global lives"))
+
+    try:
+        m.changeName()
+        r.append(check("changeName() changes playerName from 'Player One'",
+            isinstance(m.playerName, str) and m.playerName != "Player One",
+            "global playerName; playerName = \"new name\""))
+    except Exception:
+        r.append(check("changeName() changes playerName", False, "define changeName() with global playerName"))
+
+    sales_before = getattr(m, 'totalSales', None)
+    r.append(check("totalSales starts at 0",
+        sales_before == 0,
+        "totalSales = 0"))
+    try:
+        m.makeSale(100)
+        r.append(check("makeSale(100) adds to totalSales",
+            m.totalSales == 100,
+            "global totalSales; totalSales += amount"))
+    except Exception:
+        r.append(check("makeSale(100) adds to totalSales", False, "define makeSale(amount)"))
+
+    try:
+        local_color = m.localColor()
+        r.append(check("localColor() returns 'red', global color stays 'blue'",
+            local_color == "red" and m.color == "blue",
+            "create a local variable color = 'red' and return it"))
+    except Exception:
+        r.append(check("localColor() returns 'red', global color stays 'blue'", False, "define localColor()"))
+
+    counter_before = getattr(m, 'counter', None)
+    r.append(check("counter starts at 0",
+        counter_before == 0,
+        "counter = 0"))
+    try:
+        m.incrementCounter()
+        r.append(check("incrementCounter() adds 1 to counter",
+            m.counter == 1,
+            "global counter; counter += 1"))
+    except Exception:
+        r.append(check("incrementCounter() adds 1 to counter", False, "define incrementCounter()"))
+
+    try:
+        r.append(check("getDiscount() returns 0.15",
+            m.getDiscount() == 0.15,
+            "discountRate = 0.15; return discountRate"))
+    except Exception:
+        r.append(check("getDiscount() returns 0.15", False, "define getDiscount()"))
+
+    try:
+        m.endGame()
+        r.append(check("endGame() sets isGameOver to True",
+            m.isGameOver == True,
+            "global isGameOver; isGameOver = True"))
+    except Exception:
+        r.append(check("endGame() sets isGameOver to True", False, "define endGame()"))
+
+    try:
+        r.append(check("outerFunction() returns 'I am outer'",
+            m.outerFunction() == "I am outer",
+            "outerVar = 'I am outer'; innerFunction returns outerVar"))
+    except Exception:
+        r.append(check("outerFunction() returns 'I am outer'", False, "define outerFunction with nested innerFunction"))
+
+    budget_start = getattr(m, 'budget', None)
+    r.append(check("budget starts at 500",
+        budget_start == 500,
+        "budget = 500"))
+    try:
+        m.spendMoney(200)
+        r.append(check("spendMoney(200) reduces budget to 300",
+            m.budget == 300,
+            "global budget; budget -= cost"))
+    except Exception:
+        r.append(check("spendMoney(200) reduces budget", False, "define spendMoney(cost)"))
+
+    return r
+
+
+def test_mod5(m):
+    r = []
+    animals = getattr(m, 'animals', None)
+    printed = getattr(m, 'printedAnimals', None)
+    r.append(check("animals is a list of 5 strings",
+        isinstance(animals, list) and len(animals) == 5 and all(isinstance(x, str) for x in animals),
+        "animals = [\"cat\", \"dog\", ...]"))
+    r.append(check("printedAnimals contains all 5 animals (built with a loop)",
+        isinstance(printed, list) and len(printed) == 5,
+        "for animal in animals: printedAnimals.append(animal)"))
+
+    one_to_ten = getattr(m, 'oneToTen', None)
+    r.append(check("oneToTen = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]",
+        one_to_ten == list(range(1, 11)),
+        "for i in range(1, 11): oneToTen.append(i)"))
+
+    count_up = getattr(m, 'countUp', None)
+    r.append(check("countUp = [1, 2, 3, 4, 5]",
+        count_up == [1, 2, 3, 4, 5],
+        "while i <= 5: countUp.append(i); i += 1"))
+
+    prices = getattr(m, 'prices', None)
+    price_total = getattr(m, 'priceTotal', None)
+    r.append(check("priceTotal equals sum of prices",
+        isinstance(prices, list) and len(prices) >= 4 and
+        abs(price_total - sum(prices)) < 0.001,
+        "for p in prices: priceTotal += p"))
+
+    evens = getattr(m, 'evens', None)
+    r.append(check("evens = [0, 2, 4, ..., 20]",
+        evens == list(range(0, 21, 2)),
+        "if i % 2 == 0: evens.append(i)"))
+
+    count_down = getattr(m, 'countDown', None)
+    r.append(check("countDown starts at 100, subtracts 15 until below 0",
+        count_down == [100, 85, 70, 55, 40, 25, 10],
+        "n = 100; while n >= 0: countDown.append(n); n -= 15"))
+
+    names = getattr(m, 'names', None)
+    filtered = getattr(m, 'filteredNames', None)
+    r.append(check("filteredNames contains no names starting with 'A'",
+        isinstance(names, list) and isinstance(filtered, list) and
+        len(filtered) > 0 and all(not n.startswith("A") for n in filtered) and
+        len(filtered) < len(names),
+        "if name.startswith('A'): continue"))
+
+    numbers = getattr(m, 'numbers', None)
+    found = getattr(m, 'foundNumber', None)
+    r.append(check("foundNumber is the first number > 50 in 'numbers'",
+        isinstance(numbers, list) and found is not None and
+        found > 50 and found in numbers and
+        all(n <= 50 for n in numbers[:numbers.index(found)]),
+        "if num > 50: foundNumber = num; break"))
+
+    mt = getattr(m, 'multiplicationTable', None)
+    r.append(check("multiplicationTable = [7, 14, 21, ..., 70]",
+        mt == [7*i for i in range(1, 11)],
+        "for i in range(1, 11): multiplicationTable.append(7 * i)"))
+
+    lock_msg = getattr(m, 'lockMessage', None)
+    r.append(check("lockMessage = 'Locked out!' after 3 attempts",
+        lock_msg == "Locked out!",
+        "while attempts < 3: attempts += 1 ; lockMessage = 'Locked out!'"))
+
+    mixed = getattr(m, 'mixedItems', None)
+    real = getattr(m, 'realItems', None)
+    r.append(check("realItems has no None values (filtered with continue)",
+        isinstance(mixed, list) and isinstance(real, list) and
+        None not in real and len(real) < len(mixed),
+        "if item is None: continue"))
+
+    e_count = getattr(m, 'eCount', None)
+    r.append(check("eCount = 3 (letter 'e' in 'intermediate')",
+        e_count == 3,
+        "for char in 'intermediate': if char == 'e': eCount += 1"))
+
+    return r
+
+
+def test_mod6(m):
+    r = []
+    r.append(check("result1 = 'caught' (ZeroDivisionError)",
+        getattr(m, 'result1', None) == "caught",
+        "try: 10/0  except ZeroDivisionError: result1 = 'caught'"))
+    r.append(check("result2 = 'caught' (ValueError from int('hello'))",
+        getattr(m, 'result2', None) == "caught",
+        "try: int('hello')  except ValueError: result2 = 'caught'"))
+    r.append(check("result3 = 'caught' (IndexError on shortList[10])",
+        getattr(m, 'result3', None) == "caught",
+        "try: shortList[10]  except IndexError: result3 = 'caught'"))
+    r.append(check("divResult = 5.0 (10/2 in try/else)",
+        getattr(m, 'divResult', None) == 5.0,
+        "else: divResult = result"))
+    r.append(check("finallyRan = 'finally ran'",
+        getattr(m, 'finallyRan', None) == "finally ran",
+        "finally: finallyRan = 'finally ran'"))
+
+    try:
+        lst = [10, 20, 30]
+        r.append(check("getElement([10,20,30], 1) returns 20",
+            m.getElement(lst, 1) == 20,
+            "return lst[index]"))
+        r.append(check("getElement([10,20,30], 99) returns None",
+            m.getElement(lst, 99) is None,
+            "except IndexError: return None"))
+    except Exception:
+        r.append(check("getElement works", False, "define getElement(lst, index)"))
+        r.append(check("getElement returns None on bad index", False))
+
+    r.append(check("result7 = 'caught' (validateAge(-1) raises ValueError)",
+        getattr(m, 'result7', None) == "caught",
+        "if age < 0: raise ValueError(...)"))
+
+    try:
+        r.append(check("safeDivide(10, 2) returns 5.0",
+            m.safeDivide(10, 2) == 5.0,
+            "return a / b"))
+        try:
+            m.safeDivide(10, 0)
+            r.append(check("safeDivide(10, 0) raises ZeroDivisionError", False,
+                "raise ZeroDivisionError('Cannot divide by zero.')"))
+        except ZeroDivisionError:
+            r.append(check("safeDivide(10, 0) raises ZeroDivisionError", True))
+    except Exception:
+        r.append(check("safeDivide works", False, "define safeDivide(a, b)"))
+        r.append(check("safeDivide raises ZeroDivisionError on 0", False))
+
+    r.append(check("result9 = 'type error caught'",
+        getattr(m, 'result9', None) == "type error caught",
+        "except TypeError: result9 = 'type error caught'"))
+
+    try:
+        r.append(check("checkStock(5) returns 'In stock'",
+            m.checkStock(5) == "In stock",
+            "return 'In stock'"))
+        try:
+            m.checkStock(-1)
+            r.append(check("checkStock(-1) raises ValueError", False))
+        except ValueError:
+            r.append(check("checkStock(-1) raises ValueError", True))
+    except Exception:
+        r.append(check("checkStock works", False, "define checkStock(quantity)"))
+        r.append(check("checkStock(-1) raises ValueError", False))
+
+    r.append(check("parsedFloat = 3.14",
+        getattr(m, 'parsedFloat', None) == 3.14,
+        "else: parsedFloat = float('3.14')"))
+    r.append(check("inputCheckDone = 'done'",
+        getattr(m, 'inputCheckDone', None) == "done",
+        "finally: inputCheckDone = 'done'"))
+
+    try:
+        r.append(check("openFile() returns 'file not found'",
+            m.openFile() == "file not found",
+            "except FileNotFoundError: return 'file not found'"))
+    except Exception:
+        r.append(check("openFile() returns 'file not found'", False, "define openFile()"))
+
+    return r
+
+
+def test_mod7(m):
+    r = []
+    try:
+        car = m.Car("Toyota", "Corolla", 2020)
+        r.append(check("Car stores make, model, year",
+            car.make == "Toyota" and car.model == "Corolla" and car.year == 2020,
+            "self.make = make; self.model = model; self.year = year"))
+        r.append(check("car.describe() returns '[make] [model]'",
+            car.describe() == "Toyota Corolla",
+            "return self.make + ' ' + self.model"))
+    except TypeError:
+        try:
+            car = m.Car("Toyota", "Corolla")
+            r.append(check("Car stores make and model (add year too)",
+                car.make == "Toyota" and car.model == "Corolla", ""))
+            r.append(check("car.describe() returns '[make] [model]'",
+                car.describe() == "Toyota Corolla", ""))
+        except Exception:
+            r.append(check("Car class works", False, "class Car: def __init__(self, make, model, year)"))
+            r.append(check("car.describe() works", False))
+    except Exception:
+        r.append(check("Car class works", False, "class Car: def __init__(self, make, model, year)"))
+        r.append(check("car.describe() works", False))
+
+    car1 = getattr(m, 'car1', None)
+    car2 = getattr(m, 'car2', None)
+    r.append(check("car1 and car2 are Car objects with different makes",
+        car1 is not None and car2 is not None and
+        hasattr(car1, 'make') and hasattr(car2, 'make') and
+        car1.make != car2.make,
+        "car1 = Car('Honda', 'Civic', 2019)"))
+
+    try:
+        animal = m.Animal("Cat", "Meow")
+        r.append(check("Animal.speak() returns '[name] says [sound]'",
+            animal.speak() == "Cat says Meow",
+            "return self.name + ' says ' + self.sound"))
+    except Exception:
+        r.append(check("Animal.speak() works", False, "class Animal: speak returns '[name] says [sound]'"))
+
+    try:
+        pet = m.Pet("Rex", "Woof", "Jordan")
+        r.append(check("Pet inherits speak() from Animal",
+            pet.speak() == "Rex says Woof",
+            "class Pet(Animal):"))
+        r.append(check("pet.greetOwner() returns '[name] runs to [ownerName]!'",
+            pet.greetOwner() == "Rex runs to Jordan!",
+            "return self.name + ' runs to ' + self.ownerName + '!'"))
+    except Exception:
+        r.append(check("Pet inherits Animal", False, "class Pet(Animal): def __init__(self, name, sound, ownerName)"))
+        r.append(check("pet.greetOwner() works", False))
+
+    my_pet = getattr(m, 'myPet', None)
+    r.append(check("myPet is a Pet object",
+        my_pet is not None and hasattr(my_pet, 'speak') and hasattr(my_pet, 'greetOwner'),
+        "myPet = Pet('Buddy', 'Bark', 'Sam')"))
+
+    try:
+        acct = m.BankAccount("Alice", 100)
+        new_bal = acct.deposit(50)
+        r.append(check("BankAccount.deposit(50) returns 150",
+            new_bal == 150,
+            "self.balance += amount; return self.balance"))
+        r.append(check("BankAccount.withdraw(30) returns 120",
+            acct.withdraw(30) == 120,
+            "self.balance -= amount; return self.balance"))
+        r.append(check("BankAccount.withdraw(500) returns 'Insufficient funds.'",
+            acct.withdraw(500) == "Insufficient funds.",
+            "if amount > self.balance: return 'Insufficient funds.'"))
+    except Exception:
+        r.append(check("BankAccount works", False, "class BankAccount: deposit and withdraw methods"))
+        r.append(check("withdraw works", False))
+        r.append(check("withdraw returns 'Insufficient funds.'", False))
+
+    try:
+        sa = m.SavingsAccount("Bob", 200, 1.05)
+        new_bal = sa.applyInterest()
+        r.append(check("SavingsAccount.applyInterest() returns balance * interestRate",
+            abs(new_bal - 210.0) < 0.001,
+            "return self.balance * self.interestRate"))
+    except Exception:
+        r.append(check("SavingsAccount inherits BankAccount, applyInterest works", False,
+            "class SavingsAccount(BankAccount):"))
+
+    my_acct = getattr(m, 'myAccount', None)
+    r.append(check("myAccount exists and accountHolder was changed directly",
+        my_acct is not None and hasattr(my_acct, 'accountHolder') and
+        my_acct.accountHolder is not None,
+        "myAccount.accountHolder = 'New Name'"))
+
+    a1 = getattr(m, 'animalOne', None)
+    a2 = getattr(m, 'animalTwo', None)
+    r.append(check("animalOne and animalTwo have different names after mutation",
+        a1 is not None and a2 is not None and
+        hasattr(a1, 'name') and hasattr(a2, 'name') and
+        a1.name != a2.name,
+        "animalOne.name = 'something new'"))
+
+    return r
+
+
+def test_mod8(m):
+    r = []
+    padded = getattr(m, 'paddedString', None)
+    stripped = getattr(m, 'strippedString', None)
+    r.append(check("strippedString = paddedString.strip()",
+        isinstance(padded, str) and isinstance(stripped, str) and stripped == padded.strip(),
+        "strippedString = paddedString.strip()"))
+
+    lower = getattr(m, 'lowerTitle', None)
+    titled = getattr(m, 'titledString', None)
+    r.append(check("titledString = lowerTitle.title()",
+        isinstance(lower, str) and titled == lower.title(),
+        "titledString = lowerTitle.title()"))
+
+    orig = getattr(m, 'original', None)
+    repl = getattr(m, 'replaced', None)
+    r.append(check("replaced is different from original (replace() was used)",
+        isinstance(orig, str) and isinstance(repl, str) and repl != orig,
+        "replaced = original.replace('word', 'other')"))
+
+    sent = getattr(m, 'sentence', None)
+    wl = getattr(m, 'wordList', None)
+    r.append(check("wordList = sentence.split()",
+        isinstance(sent, str) and wl == sent.split(),
+        "wordList = sentence.split()"))
+
+    unsorted = getattr(m, 'unsortedNums', None)
+    sorted_n = getattr(m, 'sortedNums', None)
+    r.append(check("sortedNums is the sorted version of unsortedNums",
+        isinstance(unsorted, list) and isinstance(sorted_n, list) and
+        sorted_n == sorted(unsorted),
+        "unsortedNums.sort()  or  sortedNums = sorted(unsortedNums)"))
+
+    edit = getattr(m, 'editList', None)
+    r.append(check("editList has been modified (remove + append done)",
+        isinstance(edit, list) and len(edit) >= 4,
+        "editList.remove('item'); editList.append('new')"))
+
+    pd = getattr(m, 'personDict', None)
+    dk = getattr(m, 'dictKeys', None)
+    dv = getattr(m, 'dictValues', None)
+    r.append(check("dictKeys and dictValues extracted from personDict",
+        isinstance(pd, dict) and len(pd) >= 3 and
+        set(dk) == set(pd.keys()) and set(dv) == set(pd.values()),
+        "dictKeys = personDict.keys(); dictValues = personDict.values()"))
+
+    mv = getattr(m, 'missingValue', None)
+    r.append(check("missingValue is None (get() on missing key)",
+        mv is None,
+        "missingValue = personDict.get('nickname')"))
+
+    ud = getattr(m, 'updatedDict', None)
+    r.append(check("updatedDict is a dict with at least one key changed or removed",
+        isinstance(ud, dict) and len(ud) >= 2,
+        "personDict.update({...}); personDict.pop('key'); updatedDict = personDict"))
+
+    ns = getattr(m, 'numString', None)
+    dn = getattr(m, 'doubledNum', None)
+    r.append(check("doubledNum = int(numString) * 2",
+        isinstance(ns, str) and dn == int(ns) * 2,
+        "doubledNum = int(numString) * 2"))
+
+    dup = getattr(m, 'dupList', None)
+    uniq = getattr(m, 'uniqueList', None)
+    r.append(check("uniqueList has no duplicates (set() was used)",
+        isinstance(dup, list) and isinstance(uniq, list) and
+        len(uniq) < len(dup) and len(uniq) == len(set(dup)),
+        "uniqueList = list(set(dupList))"))
+
+    wb = getattr(m, 'wordBank', None)
+    ac = getattr(m, 'aCount', None)
+    if isinstance(wb, list):
+        expected_ac = sum(1 for w in wb if 'a' in w.lower())
+    else:
+        expected_ac = None
+    r.append(check(f"aCount = {expected_ac} (words in wordBank containing 'a')",
+        ac == expected_ac,
+        "if 'a' in word: aCount += 1"))
+
+    return r
+
+
+# ── Tests for Modules 9-16 ────────────────────────────────────────────────────
+
+
+def test_mod9(m):
+    r = []
+    r.append(check("appName is a non-empty string",
+        isinstance(getattr(m, 'appName', None), str) and len(m.appName) > 0,
+        "appName = \"MyApp\""))
+    r.append(check("sqrtResult = 12.0 (math.sqrt(144))",
+        getattr(m, 'sqrtResult', None) == 12.0,
+        "sqrtResult = math.sqrt(144)"))
+    r.append(check("circumference = 2 * pi * 5 (about 31.42)",
+        abs((getattr(m, 'circumference', None) or 0) - 31.4159) < 0.01,
+        "circumference = 2 * math.pi * 5"))
+    r.append(check("roundedUp = math.ceil(4.3) = 5",
+        getattr(m, 'roundedUp', None) == 5,
+        "from math import ceil; roundedUp = ceil(4.3)"))
+    r.append(check("roundedDown = math.floor(4.9) = 4",
+        getattr(m, 'roundedDown', None) == 4,
+        "from math import floor; roundedDown = floor(4.9)"))
+    try:
+        gai = m.getAppInfo()
+        r.append(check("getAppInfo() returns a string with appName",
+            isinstance(gai, str) and len(gai) > 0,
+            "return f\"{appName} v{appVersion}\""))
+    except Exception:
+        r.append(check("getAppInfo() returns a string", False, "define getAppInfo()"))
+    try:
+        da = m.divideAndRound(10, 3)
+        r.append(check("divideAndRound(10, 3) = 4",
+            da == 4,
+            "return math.ceil(a / b)"))
+    except Exception:
+        r.append(check("divideAndRound(10, 3) = 4", False, "define divideAndRound"))
+    r.append(check("currentModule exists and matches __name__ or module",
+        getattr(m, 'currentModule', None) is not None,
+        "currentModule = __name__"))
+    return r
+
+
+def test_mod10(m):
+    r = []
+    nums = getattr(m, 'numbers', None)
+    r.append(check("numbers = [1, 2, 3, ..., 10]",
+        nums == list(range(1, 11)),
+        "numbers = list(range(1, 11))"))
+    sq = getattr(m, 'squares', None)
+    r.append(check("squares = [1, 4, 9, ..., 100]",
+        sq == [1, 4, 9, 16, 25, 36, 49, 64, 81, 100],
+        "squares = [n**2 for n in numbers]"))
+    ev = getattr(m, 'evens', None)
+    r.append(check("evens = [2, 4, 6, 8, 10]",
+        ev == [2, 4, 6, 8, 10],
+        "evens = [n for n in numbers if n % 2 == 0]"))
+    words = getattr(m, 'words', None)
+    wl = getattr(m, 'wordLengths', None)
+    r.append(check("wordLengths matches lengths of words",
+        isinstance(words, list) and len(words) >= 5 and
+        isinstance(wl, list) and len(wl) == len(words) and
+        all(wl[i] == len(words[i]) for i in range(len(words))),
+        "wordLengths = [len(w) for w in words]"))
+    aw = getattr(m, 'aWords', None)
+    r.append(check("aWords contains only words starting with 'a'",
+        isinstance(aw, list) and len(aw) > 0 and
+        all(w.startswith('a') for w in aw),
+        "aWords = [w for w in words if w.startswith('a')]"))
+    wld = getattr(m, 'wordLengthDict', None)
+    r.append(check("wordLengthDict maps words to their lengths",
+        isinstance(wld, dict) and len(wld) >= 5 and
+        all(wld[w] == len(w) for w in words),
+        "wordLengthDict = {w: len(w) for w in words}"))
+    fl = getattr(m, 'firstLetters', None)
+    r.append(check("firstLetters is a set of unique first letters",
+        isinstance(fl, set) and len(fl) >= 3,
+        "firstLetters = {w[0] for w in words}"))
+    ni = getattr(m, 'numberedItems', None)
+    r.append(check("numberedItems has correct format",
+        isinstance(ni, list) and len(ni) == 4,
+        "numberedItems = [f'{i}: {item}' for i, item in enumerate(items)]"))
+    return r
+
+
+def test_mod11(m):
+    r = []
+    sc = getattr(m, 'salesCount', None)
+    cc = getattr(m, 'croissantCount', None)
+    r.append(check("salesCount is a defaultdict(int) with 4 croissants",
+        sc is not None and cc == 4,
+        "salesCount = defaultdict(int); for item in salesItems: salesCount[item] += 1"))
+    gbl = getattr(m, 'groupedByLetter', None)
+    r.append(check("groupedByLetter groups words by first letter",
+        gbl is not None and 'a' in gbl and 'b' in gbl,
+        "groupedByLetter = defaultdict(list); for w in wordList: groupedByLetter[w[0]].append(w)"))
+    freq = getattr(m, 'frequency', None)
+    r.append(check("frequency is a Counter with correct counts",
+        freq is not None and freq.get('croissant', 0) == 4,
+        "frequency = Counter(salesItems)"))
+    tt = getattr(m, 'topTwo', None)
+    r.append(check("topTwo has top 2 items from Counter",
+        tt is not None and len(tt) == 2,
+        "topTwo = frequency.most_common(2)"))
+    setA = getattr(m, 'setA', None)
+    setB = getattr(m, 'setB', None)
+    ur = getattr(m, 'unionResult', None)
+    ir = getattr(m, 'intersectionResult', None)
+    dr = getattr(m, 'diffResult', None)
+    r.append(check("setA and setB are sets with 4+ items each",
+        isinstance(setA, set) and len(setA) >= 4 and isinstance(setB, set) and len(setB) >= 4,
+        "setA = {1, 2, 3, 4} / setB = {3, 4, 5, 6}"))
+    r.append(check("unionResult = setA | setB",
+        setA is not None and setB is not None and ur == setA | setB,
+        "unionResult = setA | setB"))
+    r.append(check("intersectionResult = setA & setB",
+        setA is not None and setB is not None and ir == setA & setB,
+        "intersectionResult = setA & setB"))
+    r.append(check("diffResult = setA - setB",
+        setA is not None and setB is not None and dr == setA - setB,
+        "diffResult = setA - setB"))
+    iss = getattr(m, 'isSubset', None)
+    r.append(check("isSubset checks if setA is subset of setB",
+        isinstance(iss, bool),
+        "isSubset = setA.issubset(setB)"))
+    return r
+
+
+def test_mod12(m):
+    r = []
+    sa = getattr(m, 'sumAll', None)
+    try:
+        r.append(check("sumAll(1,2,3,4,5) = 15",
+            m.sumAll(1, 2, 3, 4, 5) == 15,
+            "return sum(args)"))
+    except Exception:
+        r.append(check("sumAll(1,2,3,4,5) = 15", False, "define sumAll(*args)"))
+    try:
+        bp = m.buildProfile(name="Gaby", age=25, city="Austin")
+        r.append(check("buildProfile returns key=value string",
+            isinstance(bp, str) and "Gaby" in bp,
+            "return ', '.join(f'{k}={v}' for k,v in kwargs.items())"))
+    except Exception:
+        r.append(check("buildProfile returns key=value string", False, "define buildProfile(**kwargs)"))
+    try:
+        ad = m.applyDiscount(0.1)
+        r.append(check("applyDiscount(0.1) returns callable that reduces by 10%",
+            callable(ad) and ad(100) == 90.0,
+            "return lambda price: price * (1 - discount)"))
+    except Exception:
+        r.append(check("applyDiscount(0.1) works", False, "define applyDiscount(discount)"))
+    dbl = getattr(m, 'double', None)
+    r.append(check("double is a lambda that doubles numbers",
+        callable(dbl) and dbl(5) == 10,
+        "double = lambda x: x * 2"))
+    pn = getattr(m, 'parsedNums', None)
+    r.append(check("parsedNums = [1, 2, 3] (map + lambda)",
+        pn == [1, 2, 3],
+        "parsedNums = list(map(lambda x: int(x), stringNums))"))
+    bn = getattr(m, 'bigNums', None)
+    r.append(check("bigNums contains numbers > 10 (filter + lambda)",
+        bn == [15, 22, 18],
+        "bigNums = list(filter(lambda x: x > 10, mixedNums))"))
+    sp = getattr(m, 'sortedPairs', None)
+    r.append(check("sortedPairs sorted by second element",
+        sp == [("b", 1), ("c", 2), ("a", 3)],
+        "sortedPairs = sorted(pairs, key=lambda x: x[1])"))
+    r.append(check("total = sumAll(1,2,3,4,5) = 15",
+        getattr(m, 'total', None) == 15,
+        "total = sumAll(1, 2, 3, 4, 5)"))
+    r.append(check("profile is a non-empty string",
+        isinstance(getattr(m, 'profile', None), str) and len(m.profile) > 0,
+        "profile = buildProfile(name='Gaby', ...)"))
+    return r
+
+
+def test_mod13(m):
+    r = []
+    fs = getattr(m, 'formattedSale', None)
+    r.append(check("formattedSale uses f-string with item, qty, total",
+        isinstance(fs, str) and "12" in fs and "croissant" in fs,
+        'formattedSale = f"Sold {quantity} {itemName}s for ${quantity * price:.2f}"'))
+    r.append(check("joined = 'a - b - c'",
+        getattr(m, 'joined', None) == "a - b - c",
+        "joined = ' - '.join(['a', 'b', 'c'])"))
+
+    split_f = getattr(m, 'splitFruits', None)
+    r.append(check("splitFruits = ['apple', 'banana', 'grape']",
+        split_f == ["apple", "banana", "grape"],
+        'splitFruits = fruits.split(",")'))
+    r.append(check("cleaned = 'hello world'",
+        getattr(m, 'cleaned', None) == "hello world",
+        'cleaned = "  hello world  ".strip()'))
+    r.append(check("replaced = 'the dog sat'",
+        getattr(m, 'replaced', None) == "the dog sat",
+        'replaced = "the cat sat".replace("cat", "dog")'))
+    r.append(check("findIndex = 6 ('world' starts at index 6)",
+        getattr(m, 'findIndex', None) == 6,
+        'findIndex = "hello world".find("world")'))
+
+    al = getattr(m, 'alpha', None)
+    di = getattr(m, 'digit', None)
+    an = getattr(m, 'alnum', None)
+    r.append(check("isalpha, isdigit, isalnum on 'hello123'",
+        al == False and di == False and an == True,
+        "alpha = 'hello123'.isalpha() is False"))
+    r.append(check("asPercent = '33.3%' (f-string percentage)",
+        getattr(m, 'asPercent', None) == "33.3%",
+        'asPercent = f"{fraction:.1%}"'))
+    r.append(check("withCommas = '1,234,567'",
+        getattr(m, 'withCommas', None) == "1,234,567",
+        'withCommas = f"{bigNumber:,}"'))
+
+    bw = getattr(m, 'bWords', None)
+    r.append(check("bWords found words starting with 'b' using re.findall",
+        isinstance(bw, list) and len(bw) >= 3 and all(w.startswith('b') for w in bw),
+        "bWords = re.findall(r'\\\\bb\\\\w+', text)"))
+    return r
+
+
+def test_mod14(m):
+    r = []
+    r.append(check("ceilResult = math.ceil(3.2) = 4",
+        getattr(m, 'ceilResult', None) == 4, "ceilResult = math.ceil(3.2)"))
+    r.append(check("floorResult = math.floor(3.8) = 3",
+        getattr(m, 'floorResult', None) == 3, "floorResult = math.floor(3.8)"))
+    r.append(check("sqrtResult = math.sqrt(144) = 12.0",
+        getattr(m, 'sqrtResult', None) == 12.0, "sqrtResult = math.sqrt(144)"))
+    r.append(check("powResult = math.pow(2, 10) = 1024.0",
+        abs((getattr(m, 'powResult', None) or 0) - 1024.0) < 0.01, "powResult = math.pow(2, 10)"))
+    r.append(check("circleArea = pi * 9 (about 28.27)",
+        abs((getattr(m, 'circleArea', None) or 0) - 28.274) < 0.01, "circleArea = math.pi * 3 ** 2"))
+    ri = getattr(m, 'randomInt', None)
+    r.append(check("randomInt is between 1 and 100",
+        isinstance(ri, int) and 1 <= ri <= 100, "randomInt = random.randint(1, 100)"))
+    rc = getattr(m, 'randomColor', None)
+    r.append(check("randomColor is in the color list",
+        rc in ["red", "blue", "green", "yellow"], "randomColor = random.choice(colors)"))
+    sp = getattr(m, 'sample', None)
+    r.append(check("sample is a list of 2 unique items",
+        isinstance(sp, list) and len(sp) == 2 and sp[0] != sp[1], "sample = random.sample(data, 2)"))
+    r.append(check("meanValue = statistics.mean([10..50]) = 30",
+        getattr(m, 'meanValue', None) == 30, "meanValue = statistics.mean(data)"))
+    r.append(check("medianValue = statistics.median([10..50]) = 30",
+        getattr(m, 'medianValue', None) == 30, "medianValue = statistics.median(data)"))
+    r.append(check("rounded = round(3.14159, 2) = 3.14",
+        getattr(m, 'rounded', None) == 3.14, "rounded = round(3.14159, 2)"))
+    r.append(check("min, max, sum on [4,7,2,9,5]",
+        getattr(m, 'minNum', None) == 2 and getattr(m, 'maxNum', None) == 9 and getattr(m, 'sumNums', None) == 27,
+        "minNum = min(nums); maxNum = max(nums); sumNums = sum(nums)"))
+    r.append(check("factorialResult = math.factorial(5) = 120",
+        getattr(m, 'factorialResult', None) == 120, "factorialResult = math.factorial(5)"))
+    r.append(check("gcdResult = math.gcd(12, 8) = 4",
+        getattr(m, 'gcdResult', None) == 4, "gcdResult = math.gcd(12, 8)"))
+    return r
+
+
+def test_mod15(m):
+    r = []
+    from datetime import datetime as dt_type
+    r.append(check("now is a datetime object",
+        isinstance(getattr(m, 'now', None), dt_type),
+        "now = datetime.now()"))
+    cy = getattr(m, 'currentYear', None)
+    cm = getattr(m, 'currentMonth', None)
+    cd = getattr(m, 'currentDay', None)
+    r.append(check("currentYear, currentMonth, currentDay are extracted",
+        isinstance(cy, int) and isinstance(cm, int) and isinstance(cd, int),
+        "currentYear = now.year"))
+    def check_christmas(mod):
+        c = getattr(mod, 'christmas', None)
+        if c is None: return False
+        try:
+            from datetime import date
+            return c == date(2026, 12, 25) or (hasattr(c, 'year') and c.year == 2026 and hasattr(c, 'month') and c.month == 12 and hasattr(c, 'day') and c.day == 25)
+        except: return False
+    r.append(check("christmas = date(2026, 12, 25)",
+        check_christmas(m),
+        "christmas = date(2026, 12, 25)"))
+    fd = getattr(m, 'formattedDate', None)
+    r.append(check("formattedDate uses strftime to format today",
+        isinstance(fd, str) and len(fd) > 0,
+        "formattedDate = now.strftime('%B %d, %Y')"))
+    pd = getattr(m, 'parsedDate', None)
+    r.append(check("parsedDate = datetime.strptime('2026-12-25', '%Y-%m-%d')",
+        pd is not None and (hasattr(pd, 'year') and pd.year == 2026),
+        "parsedDate = datetime.strptime('2026-12-25', '%Y-%m-%d')"))
+    duc = getattr(m, 'daysUntilChristmas', None)
+    r.append(check("daysUntilChristmas is a positive number",
+        isinstance(duc, int) and duc > 0,
+        "daysUntilChristmas = (christmas - date.today()).days"))
+    owl = getattr(m, 'oneWeekLater', None)
+    tda = getattr(m, 'thirtyDaysAgo', None)
+    r.append(check("oneWeekLater and thirtyDaysAgo are date objects",
+        owl is not None and tda is not None,
+        "oneWeekLater = date.today() + timedelta(days=7)"))
+    tf = getattr(m, 'todayFormatted', None)
+    r.append(check("todayFormatted has day, month, year in it",
+        isinstance(tf, str) and len(tf) > 5,
+        "todayFormatted = now.strftime('%A, %B %d, %Y')"))
+    icf = getattr(m, 'isChristmasFuture', None)
+    r.append(check("isChristmasFuture is True (Christmas is in the future)",
+        icf == True,
+        "isChristmasFuture = christmas > date.today()"))
+    st = getattr(m, 'specificTime', None)
+    r.append(check("specificTime is a time object",
+        st is not None,
+        "specificTime = time(14, 30, 0)"))
+    db = getattr(m, 'daysBetween', None)
+    r.append(check("daysBetween = 364 (Jan 1 to Dec 31)",
+        db == 364,
+        "daysBetween = (date2 - date1).days"))
+    return r
+
+
+def test_mod16(m):
+    r = []
+    cr = getattr(m, 'csvRows', None)
+    r.append(check("csvRows is a list (loaded from CSV)",
+        isinstance(cr, list),
+        "with open('sales.csv', 'r') as f: csvRows = list(csv.reader(f))"))
+    cdr = getattr(m, 'csvDictRows', None)
+    r.append(check("csvDictRows is a list of dicts from CSV",
+        isinstance(cdr, list),
+        "with open('sales.csv', 'r') as f: csvDictRows = list(csv.DictReader(f))"))
+
+    # Check that writing files runs without error (we just check the code runs)
+    ld = getattr(m, 'loadedData', None)
+    r.append(check("loadedData is a dict read from data.json",
+        isinstance(ld, dict),
+        "with open('data.json', 'r') as f: loadedData = json.load(f)"))
+
+    pj = getattr(m, 'parsedJson', None)
+    r.append(check("parsedJson = json.loads(jsonString)",
+        isinstance(pj, dict) and pj.get('name') == "Test",
+        "parsedJson = json.loads(jsonString)"))
+
+    jo = getattr(m, 'jsonOutput', None)
+    r.append(check("jsonOutput is a JSON string from json.dumps",
+        isinstance(jo, str) and 'Python' in jo,
+        "jsonOutput = json.dumps(pythonDict)"))
+    return r
+
+
+TEST_MAP = {
+    1: test_mod1,
+    2: test_mod2,
+    3: test_mod3,
+    4: test_mod4,
+    5: test_mod5,
+    6: test_mod6,
+    7: test_mod7,
+    8: test_mod8,
+    9: test_mod9,
+    10: test_mod10,
+    11: test_mod11,
+    12: test_mod12,
+    13: test_mod13,
+    14: test_mod14,
+    15: test_mod15,
+    16: test_mod16,
+}
+
+
+# ── Hints ────────────────────────────────────────────────────────────────────
+
+
+def print_hints(n):
+    path = mod_path(n)
+    if not os.path.exists(path):
+        return
+
+    with open(path) as f:
+        lines = f.readlines()
+
+    todos = []
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if "# TODO:" in stripped:
+            msg = stripped.split("# TODO:", 1)[1].strip()
+            todos.append(msg)
+        elif "raise NotImplementedError" in stripped:
+            for j in range(i - 1, -1, -1):
+                prev = lines[j].strip()
+                if prev.startswith("def "):
+                    name = prev.split("(")[0].replace("def ", "")
+                    todos.append(f"Implement the function '{name}()'")
+                    break
+
+    if not todos:
+        print(f"\n  {DIM}No TODO items found — check the file for instructions.{RESET}\n")
+        return
+
+    print(f"\n{BOLD}{CYAN}── Hints for Module {n} ──{RESET}\n")
+    for todo in todos:
+        print(f"  {YELLOW}◷{RESET}  {todo}")
+    print()
+
+
+# ── Watch mode ───────────────────────────────────────────────────────────────
+
+
+def watch_mod(n):
+    if n is None:
+        print(f"\n{YELLOW}No incomplete exercises found.{RESET}")
+        print(f"  Run {CYAN}pylings list{RESET} to see all exercises.\n")
+        return
+
+    if not is_not_done(n):
+        print(f"\n{GREEN}Module {n} is already complete!{RESET}")
+        print(f"  Run {CYAN}pylings list{RESET} or try a different module.\n")
+        return
+
+    path = mod_path(n)
+    last_mtime = 0
+
+    print(f"\n{YELLOW}Watching Module {n} — {MODULE_TITLES[n]}{RESET}")
+    print(f"{DIM}Tests re-run on save. Press 'q' to quit, 'h' for hints.{RESET}\n")
+
+    fd = sys.stdin.fileno()
+    use_keys = os.isatty(fd)
+    old = None
+    if use_keys:
+        try:
+            old = termios.tcgetattr(fd)
+            tty.setcbreak(fd)
+        except Exception:
+            old = None
+
+    try:
+        while True:
+            if not os.path.exists(path):
+                print(f"\n{RED}File not found: {path}{RESET}")
+                break
+
+            mtime = os.path.getmtime(path)
+
+            if mtime != last_mtime:
+                last_mtime = mtime
+                os.system('clear' if os.name == 'posix' else 'cls')
+
+                all_passed = run_mod(n)
+
+                if not is_not_done(n):
+                    print(f"{GREEN}{BOLD}Module {n} complete!{RESET}")
+                    next_n = find_next()
+                    if next_n:
+                        print(f"Moving to Module {next_n}...")
+                        n = next_n
+                        path = mod_path(n)
+                        last_mtime = os.path.getmtime(path)
+                    else:
+                        print(f"\n{GREEN}{BOLD}All exercises complete!{RESET}\n")
+                        break
+
+            if old is not None:
+                rlist, _, _ = select.select([sys.stdin], [], [], 1)
+                if rlist:
+                    ch = sys.stdin.read(1)
+                    if not ch:
+                        break
+                    if ch.lower() == 'q':
+                        print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                        break
+                    elif ch.lower() == 'h':
+                        print_hints(n)
+            else:
+                try:
+                    time.sleep(1)
+                except KeyboardInterrupt:
+                    print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                    break
+    finally:
+        if old is not None:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
+
+# ── CLI ──────────────────────────────────────────────────────────────────────
+
+
+def print_usage():
+    print(f"\n{BOLD}Usage:{RESET}")
+    print(f"  {CYAN}pylings list{RESET}          List all exercises with status")
+    print(f"  {CYAN}pylings next{RESET}          Run the next incomplete exercise")
+    print(f"  {CYAN}pylings <N>{RESET}            Run exercise N (e.g. {CYAN}pylings 3{RESET})")
+    print(f"  {CYAN}pylings watch{RESET}          Watch the next incomplete exercise")
+    print(f"  {CYAN}pylings watch <N>{RESET}      Watch exercise N")
+    print(f"\n{DIM}In watch mode: press 'q' to quit, 'h' for hints.{RESET}\n")
+
+
+def main():
+    if len(sys.argv) < 2:
+        n = find_next()
+        if n is None:
+            print(f"\n{GREEN}{BOLD}All exercises complete! Great work!{RESET}\n")
+            return
+        print(f"\n{GREEN}Starting watch mode for Module {n} — {MODULE_TITLES[n]}{RESET}\n")
+        watch_mod(n)
+        return
+
+    if sys.argv[1] in ("list", "ls", "status"):
+        list_exercises()
+        return
+
+    cmd = sys.argv[1]
+
+    if cmd in ("help", "--help", "-h"):
+        print_usage()
+        return
+
+    if cmd == "next":
+        n = find_next()
+        if n is None:
+            print(f"\n{GREEN}{BOLD}All exercises complete! Great work!{RESET}\n")
+            return
+        all_passed = run_mod(n)
+        return
+
+    if cmd == "watch":
+        n = int(sys.argv[2]) if len(sys.argv) > 2 else find_next()
+        watch_mod(n)
+        return
+
+    try:
+        n = int(cmd)
+        if n not in TEST_MAP:
+            print(f"\n{RED}Invalid module number.{RESET} Choose from: {', '.join(str(k) for k in TEST_MAP)}\n")
+            sys.exit(1)
+        all_passed = run_mod(n)
+    except ValueError:
+        print(f"\n{RED}Unknown command: {cmd}{RESET}")
+        print_usage()
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

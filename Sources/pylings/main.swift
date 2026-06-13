@@ -135,9 +135,34 @@ let MODULE_TITLES: [Int: String] = [
     16: "CSV and JSON",
 ]
 
-let PROJECT_DIR = FileManager.default.currentDirectoryPath
-let PRACTICE_DIR = PROJECT_DIR + "/Practice"
-let PYLINGS_SCRIPT = PROJECT_DIR + "/pylings"
+func findPracticeDir() -> String {
+    let cwd = FileManager.default.currentDirectoryPath
+    let checks = [
+        cwd + "/Practice/Mod1.py",
+        cwd + "/PylingsTUI/Practice/Mod1.py",
+    ]
+    for p in checks {
+        if FileManager.default.fileExists(atPath: p) {
+            return URL(fileURLWithPath: p).deletingLastPathComponent().path
+        }
+    }
+    return cwd + "/Practice"
+}
+
+func findPylingsScript() -> String {
+    let cwd = FileManager.default.currentDirectoryPath
+    let checks = [
+        cwd + "/pylings",
+        cwd + "/PylingsTUI/pylings",
+    ]
+    for p in checks {
+        if FileManager.default.fileExists(atPath: p) { return p }
+    }
+    return cwd + "/pylings"
+}
+
+let PRACTICE_DIR = findPracticeDir()
+let PYLINGS_SCRIPT = findPylingsScript()
 
 func scanExercises() -> [Exercise] {
     var exercises: [Exercise] = []
