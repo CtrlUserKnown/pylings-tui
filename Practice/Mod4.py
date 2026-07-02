@@ -1,8 +1,7 @@
 """
-Game State Management Module
+Level 4: Scopes — SCOPE QUEST!
 
-Manages global game state including player stats,
-scoring, inventory, and game control functions.
+The Gaby ventures into the wild world of scopes! Where in the code is the Gaby?!
 """
 # I AM NOT DONE
 

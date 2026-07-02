@@ -1,8 +1,7 @@
 """
-Text Formatting and Analysis Module
+Level 13: String Formatting and Text — TEXT TAKEDOWN!
 
-String manipulation, formatting, pattern matching,
-and text processing utilities.
+The Gaby takes on text! Format, slice, dice — words BEWARE!
 """
 # I AM NOT DONE
 

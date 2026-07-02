@@ -117,22 +117,22 @@ struct Exercise {
 }
 
 let MODULE_TITLES: [Int: String] = [
-    1: "Variables, Math, and Functions",
-    2: "Data Types and Functions",
-    3: "Operators and Conditionals",
-    4: "Scopes",
-    5: "Loops",
-    6: "Error Handling",
-    7: "Classes and Inheritance",
-    8: "Common Methods",
-    9: "Modules and Packages",
-    10: "List Comprehensions",
-    11: "Advanced Dicts and Sets",
-    12: "Advanced Functions",
-    13: "String Formatting and Text",
-    14: "Numbers and Math",
-    15: "Dates and Time",
-    16: "CSV and JSON",
+    1: "Level 1: Variables, Math, and Functions",
+    2: "Level 2: Data Types and Functions",
+    3: "Level 3: Operators and Conditionals",
+    4: "Level 4: Scopes",
+    5: "Level 5: Loops",
+    6: "Level 6: Error Handling",
+    7: "Level 7: Classes and Inheritance",
+    8: "Level 8: Common Methods",
+    9: "Level 9: Modules and Packages",
+    10: "Level 10: List Comprehensions",
+    11: "Level 11: Advanced Dicts and Sets",
+    12: "Level 12: Advanced Functions",
+    13: "Level 13: String Formatting and Text",
+    14: "Level 14: Numbers and Math",
+    15: "Level 15: Dates and Time",
+    16: "Level 16: CSV and JSON",
 ]
 
 func findPracticeDir() -> String {
@@ -267,7 +267,7 @@ struct App {
         buf += "\u{1B}[2J\u{1B}[H" // cls + home
 
         // ── Header ──
-        buf += "\(BG_GRAY)\(BOLD)  pylings — Gaby Learns Python  \(S)"
+        buf += "\(BG_GRAY)\(BOLD)  PYLINGS — THE GABY'S ARCADE  \(S)"
         let hdrPad = max(1, cols - 38)
         buf += String(repeating: " ", count: hdrPad)
         buf += "\(DIM)\(CYAN)\(sel+1)/\(exercises.count)\(S)\n"
@@ -324,7 +324,7 @@ struct App {
             var detailLines: [String] = []
 
             // Info lines
-            detailLines.append("\(BOLD)  Module \(ex.number) — \(ex.title)\(S)")
+            detailLines.append("\(BOLD)  \(ex.title)\(S)")
             detailLines.append("\(DIM)  File: Practice/Mod\(ex.number).py\(S)")
             let doneStatus = ex.isDone ? "\(GREEN)✔ Done\(S)" : "\(RED)✘ Not Done\(S)"
             detailLines.append("  Status: \(doneStatus)")

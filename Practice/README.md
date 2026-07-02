@@ -1,10 +1,14 @@
-# Practice Runner
+# THE GABY'S PRACTICE ARCADE — RULES & COMMANDS!
 
-This is a self-checking practice system. You write your code directly in the
-Mod files, run the checker, and it tells you what passed and what didn't.
+WELCOME, CONTESTANT! You are about to enter THE GABY'S PRACTICE ARCADE!
+I am CAINE, your GAME MASTER, and I will be watching your every move! HAHAHA!
+
+This is a self-checking practice system. The Gaby writes code directly in the
+Mod files, runs the checker, and it reveals what passed and what didn't.
+EVERY MISTAKE IS PART OF THE GAME!
 
 
-## Folder Structure
+## CABINET LAYOUT
 
 Make sure your folder looks like this before you start:
 
@@ -29,31 +33,32 @@ Make sure your folder looks like this before you start:
         └── Mod16.py
 
 `pylings` needs to be one level above the Practice folder. If the structure is off,
-the runner won't find your files.
+the GAME MASTER won't find the Gaby's files! DISQUALIFICATION!
 
 
-## Commands
+## CONTROLS
 
 Run these from anywhere (after setup):
 
 | Command | What it does |
 |---|---|
-| `pylings` | Auto-watch the next incomplete exercise |
-| `pylings list` | List all exercises with ✔ Done / ✘ Not Done status |
-| `pylings next` | Run the first incomplete exercise |
-| `pylings 3` | Run a specific exercise (replace 3 with any number 1-16) |
-| `pylings watch` | Watch the next incomplete exercise — tests re-run on every save |
-| `pylings watch 3` | Watch a specific exercise |
+| `pylings` | Auto-watch the next incomplete challenge |
+| `pylings list` | List all challenges with ✔ Done / ✘ Not Done status |
+| `pylings next` | Run the first incomplete challenge |
+| `pylings 3` | Run a specific challenge (replace 3 with any number 1-16) |
+| `pylings watch` | Watch the next incomplete challenge — tests re-run on every save |
+| `pylings watch 3` | Watch a specific challenge |
 
-**Watch-mode shortcuts:** press `q` to quit, `h` to show hints.
+**Watch-mode shortcuts:** press `q` to quit, `h` to show hints. CAINE SEES ALL!
 
-## How It Works (Rustlings-style)
 
-1. Each Mod file starts with **`# I AM NOT DONE`** — this means the exercise is still waiting to be completed.
+## HOW TO PLAY (Rustlings-style)
 
-2. Open any Mod file (e.g. `Practice/Mod1.py`). Each module looks like a real project file with `# TODO` comments and `raise NotImplementedError()` stubs. Replace them with your code.
+1. Each Mod file starts with **`# I AM NOT DONE`** — this means the challenge is still waiting to be conquered.
 
-3. Run the checker whenever you want:
+2. Open any Mod file (e.g. `Practice/Mod1.py`). Each module looks like a real project file with `# TODO` comments and `raise NotImplementedError()` stubs. Replace them with the Gaby's code.
+
+3. Run the checker whenever the Gaby wants:
 
         pylings next
 
@@ -61,7 +66,7 @@ Run these from anywhere (after setup):
 
         pylings 1
 
-4. The output shows you what passed and what didn't:
+4. The output shows what passed and what didn't:
 
         ✔  cityName is a non-empty string
         ✘  temperature is 98.6
@@ -71,20 +76,22 @@ Run these from anywhere (after setup):
 
         ████████████░░░░░░░░░░░░░░░░░░  8/13 passed
 
-5. **When all checks pass**, the runner will tell you to remove `# I AM NOT DONE` from the file. Do that to mark the exercise as complete.
+5. **When all checks pass**, the runner tells the Gaby to remove `# I AM NOT DONE` from the file. Do that to mark the challenge as complete. DING DING DING!
 
-6. Use `pylings` (no arguments) or `pylings watch` for the full Rustlings experience — it watches your file and re-runs tests automatically every time you save.
+6. Use `pylings` (no arguments) or `pylings watch` for the full arcade experience — it watches the Gaby's file and re-runs tests automatically every time the Gaby saves. I AM ALWAYS WATCHING!
 
-## Tips
 
-- Run `pylings list` anytime to see your overall progress.
-- You don't have to finish all problems before running the checker. Run it as often as you want.
-- Syntax errors are caught before tests run, with a clean message showing the exact line and column.
-- Variable names must match exactly what the problem asks for — the checker looks for specific names.
-- Some checks are flexible (e.g. `testScore` can be any number — the checker grades it based on what you pick).
-- Use `raise NotImplementedError()` for functions you haven't implemented yet — the hints system (`h` key in watch mode) will pick them up.
+## POWER UPS
 
-## Module Topics
+- Run `pylings list` anytime to see the Gaby's overall progress. HIGH SCORE TRACKING!
+- The Gaby doesn't have to finish all problems before running the checker. Run it as often as you want!
+- Syntax errors are caught before tests run, with a clean message showing the exact line and column. NO CHEATING!
+- Variable names must match exactly what the problem asks for — the checker looks for specific names. PRECISION MATTERS!
+- Some checks are flexible (e.g. `testScore` can be any number — the checker grades it based on what the Gaby picks).
+- Use `raise NotImplementedError()` for functions not yet implemented — the hints system (`h` key in watch mode) will pick them up. THE HINT BUTTON IS THE GABY'S POWER UP!
+
+
+## CHALLENGE TOPICS
 
     Module 1  — Variables, Math, and Functions
     Module 2  — Data Types and Functions
@@ -102,3 +109,9 @@ Run these from anywhere (after setup):
     Module 14 — Numbers and Math
     Module 15 — Dates and Time
     Module 16 — CSV and JSON
+
+----
+
+CAINE'S FINAL WARNING: THE GABY THINKS THIS IS JUST CODING PRACTICE.
+BUT REALLY — IT'S A GAME SHOW! AND THE PRIZE IS KNOWLEDGE! HAHAHA!
+INSERT COIN AND BEGIN!

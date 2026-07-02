@@ -1,8 +1,7 @@
 """
-Payment and File Processing Module
+Level 6: Error Handling — CATASTROPHE MODE!
 
-Demonstrates error handling patterns for payment validation,
-data conversion, and file operations.
+Everything goes wrong! The Gaby must catch errors and survive! DUN DUN DUN!
 """
 # I AM NOT DONE
 

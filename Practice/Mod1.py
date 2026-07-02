@@ -1,8 +1,8 @@
 """
-City Information Configuration Module
+Level 1: Variables, Math, and Functions — THE FOUNDATION CHALLENGE!
 
-Manages city data, measurements, pricing, and user interaction
-utilities for the city information system.
+The Gaby's first challenge: master variables, math, and functions!
+Caine is watching! HAHAHA!
 """
 # I AM NOT DONE
 

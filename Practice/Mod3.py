@@ -1,8 +1,7 @@
 """
-Order Processing and Validation Module
+Level 3: Operators and Conditionals — DECISION TIME!
 
-Handles order validation, pricing logic, access control,
-and customer status checks for an e-commerce system.
+The Gaby faces operators and conditionals! Choose wisely, contestant!
 """
 # I AM NOT DONE
 

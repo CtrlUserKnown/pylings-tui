@@ -1,8 +1,7 @@
 """
-Mathematical Computation Module
+Level 14: Numbers and Math — NUMBER CRUNCHER!
 
-Utility functions and constants for mathematical
-operations, statistics, and random generation.
+The Gaby crunches numbers! Math, stats, random — CALCULATE!
 """
 # I AM NOT DONE
 

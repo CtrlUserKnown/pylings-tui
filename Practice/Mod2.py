@@ -1,8 +1,7 @@
 """
-User Profile Management Module
+Level 2: Data Types and Functions — TYPE WARS!
 
-Handles user profile data types, display utilities,
-and common profile calculations.
+The Gaby tackles data types and functions! Strings, ints, floats — OH MY!
 """
 # I AM NOT DONE
 

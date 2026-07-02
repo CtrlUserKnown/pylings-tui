@@ -1,8 +1,7 @@
 """
-Object-Oriented Models Module
+Level 7: Classes and Inheritance — INHERITANCE BATTLE!
 
-Defines domain models for a vehicle management and
-pet adoption system using classes and inheritance.
+The Gaby learns to create classes and inherit POWER! Family trees of code!
 """
 # I AM NOT DONE
 

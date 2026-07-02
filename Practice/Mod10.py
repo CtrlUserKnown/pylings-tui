@@ -1,8 +1,7 @@
 """
-Data Transformation Service
+Level 10: List Comprehensions — EXPRESS LANE!
 
-Module for transforming, filtering, and processing
-collections of data using functional patterns.
+The Gaby discovers list comprehensions! One line to rule them all! EXPRESS!
 """
 # I AM NOT DONE
 

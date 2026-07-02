@@ -24,22 +24,22 @@ RESET = "\033[0m"
 
 
 MODULE_TITLES = {
-    1: "Variables, Math, and Functions",
-    2: "Data Types and Functions",
-    3: "Operators and Conditionals",
-    4: "Scopes",
-    5: "Loops",
-    6: "Error Handling",
-    7: "Classes and Inheritance",
-    8: "Common Methods",
-    9: "Modules and Packages",
-    10: "List Comprehensions",
-    11: "Advanced Dicts and Sets",
-    12: "Advanced Functions",
-    13: "String Formatting and Text",
-    14: "Numbers and Math",
-    15: "Dates and Time",
-    16: "CSV and JSON",
+    1: "Level 1: Variables, Math, and Functions",
+    2: "Level 2: Data Types and Functions",
+    3: "Level 3: Operators and Conditionals",
+    4: "Level 4: Scopes",
+    5: "Level 5: Loops",
+    6: "Level 6: Error Handling",
+    7: "Level 7: Classes and Inheritance",
+    8: "Level 8: Common Methods",
+    9: "Level 9: Modules and Packages",
+    10: "Level 10: List Comprehensions",
+    11: "Level 11: Advanced Dicts and Sets",
+    12: "Level 12: Advanced Functions",
+    13: "Level 13: String Formatting and Text",
+    14: "Level 14: Numbers and Math",
+    15: "Level 15: Dates and Time",
+    16: "Level 16: CSV and JSON",
 }
 
 
@@ -59,7 +59,7 @@ def is_not_done(n):
 
 
 def list_exercises():
-    print(f"\n{BOLD}Exercises:{RESET}\n")
+    print(f"\n{BOLD}CHALLENGES:{RESET}\n")
     for i in range(1, 17):
         path = mod_path(i)
         if os.path.exists(path):
@@ -120,7 +120,7 @@ def check(label, passed, hint=""):
 
 def header(mod_num):
     print(f"\n{BOLD}{CYAN}{'─' * 50}{RESET}")
-    print(f"{BOLD}{CYAN}  Module {mod_num} — {MODULE_TITLES[mod_num]}{RESET}")
+    print(f"{BOLD}{CYAN}  {MODULE_TITLES[mod_num]}{RESET}")
     print(f"{BOLD}{CYAN}{'─' * 50}{RESET}\n")
 
 
@@ -133,7 +133,7 @@ def summary(results, mod_num):
     print(f"\n{BOLD}{CYAN}{'─' * 50}{RESET}")
     print(f"  {bar}  {BOLD}{passed}/{total}{RESET} passed")
     if passed == total:
-        print(f"\n  {GREEN}{BOLD}All checks passed! Great work.{RESET}")
+        print(f"\n  {GREEN}{BOLD}ALL CHECKS PASSED! HIGH SCORE! DING DING DING!{RESET}")
         if is_not_done(mod_num):
             print(f"  {YELLOW}Remove '# I AM NOT DONE' from Practice/Mod{mod_num}.py{RESET}")
             print(f"  {YELLOW}to mark the exercise as complete.{RESET}")
@@ -1299,7 +1299,7 @@ def print_hints(n):
         print(f"\n  {DIM}No TODO items found — check the file for instructions.{RESET}\n")
         return
 
-    print(f"\n{BOLD}{CYAN}── Hints for Module {n} ──{RESET}\n")
+    print(f"\n{BOLD}{CYAN}── HINTS FOR {MODULE_TITLES[n]} ──{RESET}\n")
     for todo in todos:
         print(f"  {YELLOW}◷{RESET}  {todo}")
     print()
@@ -1310,19 +1310,19 @@ def print_hints(n):
 
 def watch_mod(n):
     if n is None:
-        print(f"\n{YELLOW}No incomplete exercises found.{RESET}")
-        print(f"  Run {CYAN}pylings list{RESET} to see all exercises.\n")
+        print(f"\n{YELLOW}NO INCOMPLETE CHALLENGES FOUND, CONTESTANT!{RESET}")
+        print(f"  Run {CYAN}pylings list{RESET} to see all challenges.\n")
         return
 
     if not is_not_done(n):
-        print(f"\n{GREEN}Module {n} is already complete!{RESET}")
-        print(f"  Run {CYAN}pylings list{RESET} or try a different module.\n")
+        print(f"\n{GREEN}LEVEL {n} — ALREADY CLEARED, CONTESTANT!{RESET}")
+        print(f"  Run {CYAN}pylings list{RESET} or try a different level.\n")
         return
 
     path = mod_path(n)
     last_mtime = 0
 
-    print(f"\n{YELLOW}Watching Module {n} — {MODULE_TITLES[n]}{RESET}")
+    print(f"\n{YELLOW}WATCHING — {MODULE_TITLES[n]}! CAINE IS SPECTATING!{RESET}")
     print(f"{DIM}Tests re-run on save. Press 'q' to quit, 'h' for hints.{RESET}\n")
 
     fd = sys.stdin.fileno()
@@ -1350,15 +1350,15 @@ def watch_mod(n):
                 all_passed = run_mod(n)
 
                 if not is_not_done(n):
-                    print(f"{GREEN}{BOLD}Module {n} complete!{RESET}")
+                    print(f"{GREEN}{BOLD}LEVEL {n} — COMPLETE! DING DING DING!{RESET}")
                     next_n = find_next()
                     if next_n:
-                        print(f"Moving to Module {next_n}...")
+                        print(f"MOVING TO LEVEL {next_n}...")
                         n = next_n
                         path = mod_path(n)
                         last_mtime = os.path.getmtime(path)
                     else:
-                        print(f"\n{GREEN}{BOLD}All exercises complete!{RESET}\n")
+                        print(f"\n{GREEN}{BOLD}ALL LEVELS COMPLETE! THE GABY IS THE CHAMPION!{RESET}\n")
                         break
 
             if old is not None:
@@ -1368,7 +1368,7 @@ def watch_mod(n):
                     if not ch:
                         break
                     if ch.lower() == 'q':
-                        print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                        print(f"\n{YELLOW}GAME OVER! INSERT COIN TO CONTINUE!{RESET}\n")
                         break
                     elif ch.lower() == 'h':
                         print_hints(n)
@@ -1387,12 +1387,12 @@ def watch_mod(n):
 
 
 def print_usage():
-    print(f"\n{BOLD}Usage:{RESET}")
-    print(f"  {CYAN}pylings list{RESET}          List all exercises with status")
-    print(f"  {CYAN}pylings next{RESET}          Run the next incomplete exercise")
-    print(f"  {CYAN}pylings <N>{RESET}            Run exercise N (e.g. {CYAN}pylings 3{RESET})")
-    print(f"  {CYAN}pylings watch{RESET}          Watch the next incomplete exercise")
-    print(f"  {CYAN}pylings watch <N>{RESET}      Watch exercise N")
+    print(f"\n{BOLD}CONTROLS:{RESET}")
+    print(f"  {CYAN}pylings list{RESET}          List all challenges with status")
+    print(f"  {CYAN}pylings next{RESET}          Run the next incomplete challenge")
+    print(f"  {CYAN}pylings <N>{RESET}            Run challenge N (e.g. {CYAN}pylings 3{RESET})")
+    print(f"  {CYAN}pylings watch{RESET}          Watch the next incomplete challenge")
+    print(f"  {CYAN}pylings watch <N>{RESET}      Watch challenge N")
     print(f"\n{DIM}In watch mode: press 'q' to quit, 'h' for hints.{RESET}\n")
 
 
@@ -1400,9 +1400,9 @@ def main():
     if len(sys.argv) < 2:
         n = find_next()
         if n is None:
-            print(f"\n{GREEN}{BOLD}All exercises complete! Great work!{RESET}\n")
+            print(f"\n{GREEN}{BOLD}ALL CHALLENGES COMPLETE! THE GABY WINS! HAHAHA!{RESET}\n")
             return
-        print(f"\n{GREEN}Starting watch mode for Module {n} — {MODULE_TITLES[n]}{RESET}\n")
+        print(f"\n{GREEN}STARTING WATCH MODE — {MODULE_TITLES[n]}! CAINE IS READY!{RESET}\n")
         watch_mod(n)
         return
 
@@ -1419,7 +1419,7 @@ def main():
     if cmd == "next":
         n = find_next()
         if n is None:
-            print(f"\n{GREEN}{BOLD}All exercises complete! Great work!{RESET}\n")
+            print(f"\n{GREEN}{BOLD}ALL CHALLENGES COMPLETE! THE GABY WINS! HAHAHA!{RESET}\n")
             return
         all_passed = run_mod(n)
         return

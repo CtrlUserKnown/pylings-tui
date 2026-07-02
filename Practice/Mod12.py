@@ -1,8 +1,7 @@
 """
-Function Utility Library
+Level 12: Advanced Functions — FUNCTION JUNCTION!
 
-Demonstrates advanced Python function features including
-*args, **kwargs, lambda functions, closures, and map/filter patterns.
+The Gaby arrives at Function Junction! Args, kwargs, lambdas — DESTINATION!
 """
 # I AM NOT DONE
 

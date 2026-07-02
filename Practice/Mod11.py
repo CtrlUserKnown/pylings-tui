@@ -1,8 +1,7 @@
 """
-Inventory and Collection Manager
+Level 11: Advanced Dicts and Sets — COLLECTION CHALLENGE!
 
-Manages grouped data structures, frequency counting,
-and set-based operations for data processing.
+The Gaby masters advanced collections! Dicts, sets, and Counters — COLLECT!
 """
 # I AM NOT DONE
 
